@@ -1,3 +1,0 @@
-[submodule "sudoku-genetic-algorithm"]
-	path = sudoku-genetic-algorithm
-	url = https://github.com/ctjacobs/sudoku-genetic-algorithm.git
