@@ -1,10 +1,10 @@
 #include <iostream>
 #include <cmath>
-#include "sudoku_serial_bruteforce.h"
+#include "sudoku_serial_backtracking.h"
 
 extern Sudoku* result;
 
-void SerialBruteForceSolver::init(const Sudoku& sudoku) {
+void SerialBacktrackingSolver::init(const Sudoku& sudoku) {
     result = new Sudoku();
     result->size = sudoku.size;
     result->grid = new uint8_t*[sudoku.size];
@@ -16,10 +16,10 @@ void SerialBruteForceSolver::init(const Sudoku& sudoku) {
     }
 }
 
-void SerialBruteForceSolver::solve() {
+void SerialBacktrackingSolver::solve() {
     backtracking();
 }
-bool SerialBruteForceSolver::backtracking() {
+bool SerialBacktrackingSolver::backtracking() {
     int row, col;
 
     // Find the next empty cell (0 indicates an empty cell)
@@ -43,7 +43,7 @@ bool SerialBruteForceSolver::backtracking() {
     }
     return false;  // Trigger recursion
 }
-bool SerialBruteForceSolver::is_valid(int row, int col, int num) const {
+bool SerialBacktrackingSolver::is_valid(int row, int col, int num) const {
     // Check row and column for conflicts
     for (int i = 0; i < result->size; ++i) {
         if (result->grid[row][i] == num || result->grid[i][col] == num) {
@@ -64,7 +64,7 @@ bool SerialBruteForceSolver::is_valid(int row, int col, int num) const {
     return true;
 }
 
-void SerialBruteForceSolver::display() const {
+void SerialBacktrackingSolver::display() const {
     
     for (int i = 0; i < result->size; ++i) {
         for (int j = 0; j < result->size; ++j) {
@@ -74,7 +74,7 @@ void SerialBruteForceSolver::display() const {
     }
 }
 
-bool SerialBruteForceSolver::find_empty(int &row, int &col) const {
+bool SerialBacktrackingSolver::find_empty(int &row, int &col) const {
     for (row = 0; row < result->size; ++row) {
         for (col = 0; col < result->size; ++col) {
             if (result->grid[row][col] == 0) {

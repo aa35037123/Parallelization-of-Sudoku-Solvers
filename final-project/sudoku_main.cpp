@@ -1,6 +1,6 @@
 #include "sudoku.h"
 #include "sudoku_serial_backtracking.h"
-#include "sudoku_backtracking.h"
+#include "sudoku_serial_bruteforce.h"
 #include <iostream>
 
 int main(int argc, char* argv[]) {
