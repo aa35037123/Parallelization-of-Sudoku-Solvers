@@ -17,9 +17,9 @@ void SerialBruteForceSolver::init(const Sudoku& sudoku) {
 }
 
 void SerialBruteForceSolver::solve() {
-    bruteforce();
+    backtracking();
 }
-bool SerialBruteForceSolver::bruteforce() {
+bool SerialBruteForceSolver::backtracking() {
     int row, col;
 
     // Find the next empty cell (0 indicates an empty cell)
@@ -33,7 +33,7 @@ bool SerialBruteForceSolver::bruteforce() {
             result->grid[row][col] = num;
 
             // Recursively attempt to solve the rest of the puzzle
-            if (bruteforce()) {
+            if (backtracking()) {
                 return true;
             }
 

@@ -12,7 +12,7 @@ TARGETS = sudoku_main
 DEPENDENCIES = \
 	./src/sudoku.cpp \
 	./src/sudoku_backtracking.cpp \
-	./src/sudoku_serial_bruteforce.cpp 
+	./src/sudoku_serial_backtracking.cpp 
 
 all: $(TARGETS)
 

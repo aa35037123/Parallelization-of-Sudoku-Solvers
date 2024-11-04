@@ -5,11 +5,11 @@
 #include "sudoku.h"
 #include "sudoku_solver.h"
 
-class SerialBruteForceSolver: public SudokuSolver{
+class SerialBacktrackingSolver: public SudokuSolver{
 public:
     Sudoku* result;
-    SerialBruteForceSolver() : result(nullptr) {}
-    SerialBruteForceSolver(const Sudoku& sudoku) : result(nullptr) {
+    SerialBacktrackingSolver() : result(nullptr) {}
+    SerialBacktrackingSolver(const Sudoku& sudoku) : result(nullptr) {
         init(sudoku);
     }
 
@@ -23,7 +23,7 @@ public:
 
 private:
     bool find_empty(int &row, int &col) const;
-    bool bruteforce();
+    bool backtracking();
 };
 
 #endif
