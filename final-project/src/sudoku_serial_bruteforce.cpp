@@ -17,9 +17,9 @@ void SerialBruteForceSolver::init(const Sudoku& sudoku) {
 }
 
 void SerialBruteForceSolver::solve() {
-    backtracking();
+    bruteforce();
 }
-bool SerialBruteForceSolver::backtracking() {
+bool SerialBruteForceSolver::bruteforce() {
     int row, col;
 
     // Find the next empty cell (0 indicates an empty cell)
@@ -33,7 +33,7 @@ bool SerialBruteForceSolver::backtracking() {
             result->grid[row][col] = num;
 
             // Recursively attempt to solve the rest of the puzzle
-            if (backtracking()) {
+            if (bruteforce()) {
                 return true;
             }
 
@@ -41,7 +41,7 @@ bool SerialBruteForceSolver::backtracking() {
             result->grid[row][col] = 0;
         }
     }
-    return false;  // Trigger backtracking
+    return false;  // Trigger recursion
 }
 bool SerialBruteForceSolver::is_valid(int row, int col, int num) const {
     // Check row and column for conflicts
@@ -51,7 +51,6 @@ bool SerialBruteForceSolver::is_valid(int row, int col, int num) const {
         }
     }
     int grid_length = sqrt(result->size);
-    // Check 3x3 subgrid for conflicts
     int startRow = (row / grid_length) * grid_length;
     int startCol = (col / grid_length) * grid_length;
     

@@ -23,7 +23,7 @@ public:
 
 private:
     bool find_empty(int &row, int &col) const;
-    bool backtracking();
+    bool bruteforce();
 };
 
 #endif
