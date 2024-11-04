@@ -1,4 +1,5 @@
 #include "sudoku.h"
+#include "sudoku_backtracking.h"
 #include <iostream>
 
 int main(int argc, char* argv[]) {
