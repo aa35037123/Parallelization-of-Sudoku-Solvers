@@ -1,4 +1,5 @@
 #include "sudoku.h"
+#include "sudoku_brute_force_serial.h"
 #include <iostream>
 
 int main(int argc, char* argv[]) {
@@ -9,19 +10,22 @@ int main(int argc, char* argv[]) {
 
     std::string filename = argv[1]; // Get the filename from command-line arguments
 
-
     // Dynamically allocate the Sudoku grid
     Sudoku sudoku = loadSudoku(filename);
 
+    // Create a brute force serial solver object
+    SerialBruteForceSolver* solver = new SerialBruteForceSolver(sudoku);
+    solver->solve();
+    
     // Load Sudoku from the file and print it
     std::cout << "Sudoku puzzle loaded from " << filename << ":\n";
-    printSudoku(sudoku);
+    printSudoku(solver->result);
 
-    bool valid = isSudokuValid(sudoku);
+    bool valid = isSudokuValid(solver->result);
     std::cout << "Sudoku is " << (valid ? "valid." : "invalid.") << std::endl;
 
     // Clean up memory
-    deallocateSudoku(sudoku);
+    deallocateSudoku(solver->result);
 
     return 0;
 }
