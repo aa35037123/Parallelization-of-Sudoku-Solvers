@@ -1,5 +1,6 @@
 #include "sudoku.h"
-#include "sudoku_brute_force_serial.h"
+#include "sudoku_serial_bruteforce.h"
+#include "sudoku_backtracking.h"
 #include <iostream>
 
 int main(int argc, char* argv[]) {
@@ -19,13 +20,13 @@ int main(int argc, char* argv[]) {
     
     // Load Sudoku from the file and print it
     std::cout << "Sudoku puzzle loaded from " << filename << ":\n";
-    printSudoku(solver->result);
+    printSudoku(*(solver->result));
 
-    bool valid = isSudokuValid(solver->result);
+    bool valid = isSudokuValid(*(solver->result));
     std::cout << "Sudoku is " << (valid ? "valid." : "invalid.") << std::endl;
 
     // Clean up memory
-    deallocateSudoku(solver->result);
+    deallocateSudoku(*(solver->result));
 
     return 0;
 }

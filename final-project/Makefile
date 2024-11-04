@@ -6,29 +6,18 @@ CXX = g++
 # Compiler flags
 CXXFLAGS = -Wall -Wextra -std=c++11
 
-# Source files
-TEST_SRCS = test.cpp sudoku.cpp
+# All output target executables
+TARGETS = sudoku_main
 
-# Object files
-TEST_OBJS = $(TEST_SRCS:.cpp=.o)
+DEPENDENCIES = \
+	./src/sudoku.cpp \
+	./src/sudoku_backtracking.cpp \
+	./src/sudoku_serial_bruteforce.cpp 
 
-# Executable name
-TEST_TARGET = sudoku_test
+all: $(TARGETS)
 
-.PHONY: test clean
+sudoku_main: sudoku_main.cpp $(DEPENDENCIES)
+	$(CXX) $(CXX_FLAGS) $(OPENMP) -I ./includes -o $@ $^
 
-# Rule to build the test executable
-all:
-test: $(TEST_TARGET)
-
-# Rule to build the executable
-$(TEST_TARGET): $(TEST_OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^
-
-# Rule to compile source files into object files
-%.o: %.cpp sudoku.h
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-# Clean up build files
 clean:
-	rm -f $(TEST_OBJS) $(TEST_TARGET)
+	rm -f $(TARGETS) $(OBJECTS) solution.txt
