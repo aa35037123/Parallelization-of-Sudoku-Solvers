@@ -52,9 +52,9 @@ public:
     void evolve(int selection_size, int crossover_amount, double crossover_portion, int mutate_amount, int mutate_grids, const std::vector<std::vector<uint8_t>>& given);
     void selection(int selection_size);
 
-    void crossover(int crossover_amount, double crossover_portion);
+    void crossover(int start_index, int crossover_amount, double crossover_portion);
 
-    void mutate(int mutate_amount, int mutate_grids, const std::vector<std::vector<uint8_t>>& given);
+    void mutate(int start_index, int mutate_amount, int mutate_grids, const std::vector<std::vector<uint8_t>>& given);
 
 
 };
@@ -67,9 +67,9 @@ public:
     int population_size = 100;
     int selection_size = 50;
     int crossover_amount = 25;
-    double crossover_portion = 0.5;
+    double crossover_portion = 0.2;
     int mutate_amount = 25;
-    int mutate_grids = 3;
+    int mutate_grids = 5;
 
     SerialGeneticSolver(const Sudoku& sudoku);
 

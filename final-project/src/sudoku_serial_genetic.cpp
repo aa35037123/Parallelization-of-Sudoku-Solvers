@@ -119,35 +119,37 @@ void Population::selection(int selection_size) {
     population.sort([](Candidate* a, Candidate* b) {
         return a->fitness > b->fitness;
     });
-    while (population.size() > selection_size) {
-        delete population.back();
-        population.pop_back();
-    }
+    // while (population.size() > selection_size) {
+    //     delete population.back();
+    //     population.pop_back();
+    // }
     // std::cout << population.size() << " candidates selected\n";
 }
 
-void Population::crossover(int crossover_amount, double crossover_portion){
-    for (int i = 0; i < crossover_amount; i++){
+void Population::crossover(int start_index, int crossover_amount, double crossover_portion){
+    for (int i = start_index; i < crossover_amount + start_index; i++){
         std::list<Candidate*>::iterator it1 = population.begin();
         std::list<Candidate*>::iterator it2 = population.begin();
-        std::advance(it1, rand() % population.size());
-        std::advance(it2, rand() % population.size());
-        Candidate* parent1 = new Candidate((*it1)->sudoku);
-        Candidate* parent2 = *it2;
-        parent1->crossover(*parent2, crossover_portion);
-        population.push_back(parent1);
+        std::list<Candidate*>::iterator it3 = population.begin();
+        std::advance(it1, rand() % 50);
+        std::advance(it2, rand() % 50);
+        std::advance(it3, i);
+
+        **it3 = **it1;
+        (*it3)->crossover(**it2, crossover_portion);
     }
 }
 
-void Population::mutate(int mutate_amount, int mutate_grids, const std::vector<std::vector<uint8_t>>& given) {
+void Population::mutate(int start_index, int mutate_amount, int mutate_grids, const std::vector<std::vector<uint8_t>>& given) {
     int init_size = population.size();
-    for (int i = 0; i < mutate_amount; i++) {
-        std::cout << "Mutating " << i << "\n";
+    for (int i = start_index; i < mutate_amount + start_index; i++) {
+        // std::cout << "Mutating " << i << "\n";
         std::list<Candidate*>::iterator it = population.begin();
-        std::advance(it, rand() % init_size);
-        Candidate* new_candidate = new Candidate((*it)->sudoku);
-        new_candidate->mutate(mutate_grids, given);
-        population.push_back(new_candidate);
+        std::list<Candidate*>::iterator it2 = population.begin();
+        std::advance(it, rand() % 50);
+        std::advance(it2, i);
+        **it2 = **it;
+        (*it2)->mutate(mutate_grids, given);
     }
 }
 
@@ -155,13 +157,14 @@ void Population::evolve(int selection_size, int crossover_amount, double crossov
     for (Candidate* candidate : population) {
         candidate->update_fitness();
     }
-    std::cout << "Fitness updated\n";
+    // std::cout << "Fitness updated\n";
     selection(selection_size);
-    std::cout << "Selection done\n";
-    mutate(mutate_amount, mutate_grids, given);
-    std::cout << "Mutation done\n";
-    crossover(crossover_amount, crossover_portion);
-    std::cout << "Crossover done\n";
+    // std::cout << "Mutation done\n";
+    crossover(selection_size, crossover_amount, crossover_portion);
+    // std::cout << "Selection done\n";
+    mutate(selection_size + crossover_amount, mutate_amount, mutate_grids, given);
+    
+    // std::cout << "Crossover done\n";
     
     generation++;
 }
@@ -199,6 +202,9 @@ Sudoku SerialGeneticSolver::solve() {
             break;
         }
         std::cout << "Fitness: " << population->population.front()->fitness << "\n";
+        // if (population->generation > 10) {
+        //     break;
+        // }
     }
     Sudoku result;
     result = population->population.front()->sudoku;
