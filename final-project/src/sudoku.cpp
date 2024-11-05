@@ -16,11 +16,14 @@ Sudoku::Sudoku(int size) : size(size) {
     allocateGrid();
 }
 
-Sudoku::Sudoku(int size, uint8_t** grid) : size(size), grid(grid) {
+Sudoku::Sudoku(int size, uint8_t** grid) : size(size) {
     allocateGrid();
     for (int i = 0; i < size; ++i) {
         memcpy(this->grid[i], grid[i], size * sizeof(uint8_t));
     }
+    // std::cout << "In sudoku constructor\n";
+    // std::cout << "Size: " << size << "\n";
+    // print();
 }
 
 void Sudoku::allocateGrid() {
@@ -116,7 +119,14 @@ bool Sudoku::isValid() const {
 }
 
 void Sudoku::copyFrom(const Sudoku& other) {
-    if (size != other.size) return;  // Ensure sizes are compatible
+    if (grid == nullptr) {
+        size = other.size;
+        allocateGrid();
+    } 
+    else if (size != other.size){
+        std::cerr << "Grid sizes do not match when copying.\n";
+        return;
+    }
     for (int i = 0; i < size; ++i) {
         memcpy(grid[i], other.grid[i], size * sizeof(uint8_t));
     }

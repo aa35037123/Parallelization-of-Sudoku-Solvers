@@ -4,7 +4,7 @@
 CXX = g++
 
 # Compiler flags
-CXXFLAGS = -Wall -Wextra -std=c++11
+CXXFLAGS = -Wall -Wextra -std=c++11 -fsanitize=address
 
 # All output target executables
 TARGETS = sudoku_main
@@ -12,7 +12,8 @@ TARGETS = sudoku_main
 DEPENDENCIES = \
 	./src/sudoku.cpp \
 	./src/sudoku_serial_bruteforce.cpp \
-	./src/sudoku_serial_backtracking.cpp 
+	./src/sudoku_serial_backtracking.cpp \
+	./src/sudoku_serial_genetic.cpp
 
 all: $(TARGETS)
 

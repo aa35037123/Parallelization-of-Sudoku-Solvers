@@ -8,10 +8,11 @@
 class Candidate {
 public:
     Sudoku sudoku;
-    double fitness;
-    Candidate(Sudoku sudoku){
-        this->sudoku = Sudoku(sudoku.size, sudoku.grid);
-    };
+    double fitness = 0;
+    // Candidate(Sudoku sudoku){
+    //     this->sudoku = Sudoku(sudoku.size, sudoku.grid);
+    // };
+    Candidate(const Sudoku& sudoku) : sudoku(sudoku.size, sudoku.grid) {}
 
     Candidate(const Candidate& other) {
         this->sudoku = Sudoku(other.sudoku.size, other.sudoku.grid);
@@ -40,14 +41,7 @@ public:
     int population_size;
     int generation = 0;
 
-    Population(int population_size, const Sudoku& sudoku) {
-        this->population_size = population_size;
-        for (int i = 0; i < population_size; ++i) {
-            Candidate* candidate = new Candidate(sudoku);
-            candidate->initialize();
-            population.push_back(candidate);
-        }
-    }
+    Population(int population_size, const Sudoku& sudoku);
 
     ~Population() {
         for (Candidate* candidate : population) {
@@ -63,6 +57,27 @@ public:
     void mutate(int mutate_amount, int mutate_grids, const std::vector<std::vector<uint8_t>>& given);
 
 
+};
+
+
+class SerialGeneticSolver {
+public:
+    std::vector<std::vector<uint8_t>> given;
+    Population* population;
+    int population_size = 100;
+    int selection_size = 50;
+    int crossover_amount = 25;
+    double crossover_portion = 0.5;
+    int mutate_amount = 25;
+    int mutate_grids = 3;
+
+    SerialGeneticSolver(const Sudoku& sudoku);
+
+    ~SerialGeneticSolver() {
+        delete population;
+    }
+
+    Sudoku solve();
 
 };
 

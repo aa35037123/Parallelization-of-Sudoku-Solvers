@@ -4,6 +4,7 @@
 #include <random>
 #include <cmath>
 #include <stdlib.h>
+#include <iostream>
 
 
 void Candidate::update_fitness() {
@@ -69,15 +70,21 @@ void Candidate::crossover(const Candidate& parent1, double crossover_portion) {
 }
 
 void Candidate::initialize() {
+    // std::cout << "Initializing candidate\n";
+    // std::cout << sudoku.size;
     std::vector<bool> row(sudoku.size);
     std::vector<uint8_t> row_miss;
     for (int i = 0; i < sudoku.size; ++i) {
+        // std::cout << "Initializing row " << i << "\n";
         std::fill(row.begin(), row.end(), true);
+        // std::cout << "Row filled\n";
         for (int j = 0; j < sudoku.size; ++j) {
-            if (sudoku.grid[i][j] != 0)
+            if (sudoku.grid[i][j] != 0){
                 row[sudoku.grid[i][j] - 1] = false;
+            }
         }
-        for (int j = 0; j < sudoku.size; ++j) {
+        // std::cout << "Row initialized\n";
+        for (uint8_t j = 0; j < sudoku.size; ++j) {
             if (row[j]) {
                 row_miss.push_back(j+1);
             }
@@ -90,16 +97,33 @@ void Candidate::initialize() {
             }
         }
     }
+    // sudoku.print();
+}
+
+Population::Population(int population_size, const Sudoku& sudoku) {
+    // std::cout << "Population constructor\n";
+    this->population_size = population_size;
+    for (int i = 0; i < population_size; ++i) {
+        // std::cout << "Creating candidate " << i << "\n";
+        Candidate* candidate = new Candidate(sudoku);
+        // std::cout << "Candidate created\n";
+        candidate->initialize();
+        // std::cout << "Candidate initialized\n";
+        population.push_back(candidate);
+        // std::cout << "Candidate added to population\n";
+    }
+    std::cout << "Population initialized\n";
 }
 
 void Population::selection(int selection_size) {
     population.sort([](Candidate* a, Candidate* b) {
         return a->fitness > b->fitness;
     });
-    while (population.size() > population_size) {
+    while (population.size() > selection_size) {
         delete population.back();
         population.pop_back();
     }
+    // std::cout << population.size() << " candidates selected\n";
 }
 
 void Population::crossover(int crossover_amount, double crossover_portion){
@@ -116,9 +140,11 @@ void Population::crossover(int crossover_amount, double crossover_portion){
 }
 
 void Population::mutate(int mutate_amount, int mutate_grids, const std::vector<std::vector<uint8_t>>& given) {
+    int init_size = population.size();
     for (int i = 0; i < mutate_amount; i++) {
+        std::cout << "Mutating " << i << "\n";
         std::list<Candidate*>::iterator it = population.begin();
-        std::advance(it, rand() % population.size());
+        std::advance(it, rand() % init_size);
         Candidate* new_candidate = new Candidate((*it)->sudoku);
         new_candidate->mutate(mutate_grids, given);
         population.push_back(new_candidate);
@@ -129,8 +155,53 @@ void Population::evolve(int selection_size, int crossover_amount, double crossov
     for (Candidate* candidate : population) {
         candidate->update_fitness();
     }
+    std::cout << "Fitness updated\n";
     selection(selection_size);
-    crossover(crossover_amount, crossover_portion);
+    std::cout << "Selection done\n";
     mutate(mutate_amount, mutate_grids, given);
+    std::cout << "Mutation done\n";
+    crossover(crossover_amount, crossover_portion);
+    std::cout << "Crossover done\n";
+    
     generation++;
+}
+
+
+SerialGeneticSolver::SerialGeneticSolver(const Sudoku& sudoku) {
+    std::cout << "SerialGeneticSolver constructor\n";
+    for (int i = 0; i < sudoku.size; ++i) {
+        std::vector<uint8_t> row;
+        std::vector<bool> row_miss(sudoku.size);
+        std::fill(row_miss.begin(), row_miss.end(), true);
+        
+        for (int j = 0; j < sudoku.size; ++j) {
+            if (sudoku.grid[i][j] != 0)
+                row_miss[sudoku.grid[i][j] - 1] = false;
+        }
+        for (uint8_t j = 0; j < sudoku.size; ++j) {
+            if (row_miss[j]) {
+                row.push_back(j+1);
+            }
+        }
+        given.push_back(row);
+    }
+    // std::cout << "Given initialized\n";
+    population = new Population(population_size, sudoku);
+    // std::cout << "Population initialized\n";
+}
+
+Sudoku SerialGeneticSolver::solve() {
+    while (true) {
+        std::cout << "Generation: " << population->generation << "\n";
+        population->evolve(selection_size, crossover_amount, crossover_portion, mutate_amount, mutate_grids, given);
+        std::cout << "Evolved\n";
+        if (population->population.front()->sudoku.isValid()) {
+            break;
+        }
+        std::cout << "Fitness: " << population->population.front()->fitness << "\n";
+    }
+    Sudoku result;
+    result = population->population.front()->sudoku;
+    result.print();
+    return result;
 }
