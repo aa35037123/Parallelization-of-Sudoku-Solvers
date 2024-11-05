@@ -12,7 +12,8 @@ int main(int argc, char* argv[]) {
     std::string filename = argv[1]; // Get the filename from command-line arguments
 
     // Dynamically allocate the Sudoku grid
-    Sudoku sudoku = loadSudoku(filename);
+    Sudoku sudoku;
+    sudoku.loadSudoku(filename);
 
     // Create a brute force serial solver object
     SerialBacktrackingSolver* solver = new SerialBacktrackingSolver(sudoku);
@@ -20,13 +21,13 @@ int main(int argc, char* argv[]) {
     
     // Load Sudoku from the file and print it
     std::cout << "Sudoku puzzle loaded from " << filename << ":\n";
-    printSudoku(*(solver->result));
+    solver->result->print();
 
-    bool valid = isSudokuValid(*(solver->result));
+    bool valid = solver->result->isValid();
     std::cout << "Sudoku is " << (valid ? "valid." : "invalid.") << std::endl;
 
     // Clean up memory
-    deallocateSudoku(*(solver->result));
-
+    // deallocateSudoku(*(solver->result));
+    delete solver;
     return 0;
 }

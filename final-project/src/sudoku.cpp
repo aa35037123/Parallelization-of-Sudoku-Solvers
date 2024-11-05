@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <unordered_set>
 #include <cmath>
+#include <stdio.h>
+#include <string.h>
 #include "sudoku.h"
 
 
@@ -17,7 +19,7 @@ Sudoku::Sudoku(int size) : size(size) {
 Sudoku::Sudoku(int size, uint8_t** grid) : size(size), grid(grid) {
     allocateGrid();
     for (int i = 0; i < size; ++i) {
-        std::memcpy(this->grid[i], grid[i], size * sizeof(uint8_t));
+        memcpy(this->grid[i], grid[i], size * sizeof(uint8_t));
     }
 }
 
@@ -116,6 +118,6 @@ bool Sudoku::isValid() const {
 void Sudoku::copyFrom(const Sudoku& other) {
     if (size != other.size) return;  // Ensure sizes are compatible
     for (int i = 0; i < size; ++i) {
-        std::memcpy(grid[i], other.grid[i], size * sizeof(uint8_t));
+        memcpy(grid[i], other.grid[i], size * sizeof(uint8_t));
     }
 }
