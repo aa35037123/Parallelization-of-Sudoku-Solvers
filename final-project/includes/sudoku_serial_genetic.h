@@ -37,9 +37,13 @@ public:
 
 class Population {
 public:
-    std::list<Candidate*> population;
+    std::vector<Candidate*> population;
+    std::vector<int> empty_indices;
+    std::vector<int> filled_indices;
     int population_size;
     int generation = 0;
+    int best_index = 0;
+    int best_fitness = 0;
 
     Population(int population_size, const Sudoku& sudoku);
 
@@ -51,10 +55,14 @@ public:
 
     void evolve(int selection_size, int crossover_amount, double crossover_portion, int mutate_amount, int mutate_grids, const std::vector<std::vector<uint8_t>>& given);
     void selection(int selection_size);
+    void print_empty_indices();
+    void print_fitness_statistics();
+    void print_filled_indeces();
+    void print_vector_statistics(const std::vector<int>& vc);
 
-    void crossover(int start_index, int crossover_amount, double crossover_portion);
+    void crossover(int crossover_amount, double crossover_portion);
 
-    void mutate(int start_index, int mutate_amount, int mutate_grids, const std::vector<std::vector<uint8_t>>& given);
+    void mutate(int mutate_amount, int mutate_grids, const std::vector<std::vector<uint8_t>>& given);
 
 
 };
@@ -64,11 +72,11 @@ class SerialGeneticSolver {
 public:
     std::vector<std::vector<uint8_t>> given;
     Population* population;
-    int population_size = 100;
+    int population_size = 150;
     int selection_size = 50;
-    int crossover_amount = 25;
-    double crossover_portion = 0.2;
-    int mutate_amount = 25;
+    int crossover_amount = 50;
+    double crossover_portion = 0.5;
+    int mutate_amount = 50;
     int mutate_grids = 5;
 
     SerialGeneticSolver(const Sudoku& sudoku);
