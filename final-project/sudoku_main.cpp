@@ -1,6 +1,7 @@
 #include "sudoku.h"
 #include "sudoku_serial_backtracking.h"
 #include "sudoku_serial_bruteforce.h"
+#include "sudoku_serial_genetic.h"
 #include <iostream>
 
 int main(int argc, char* argv[]) {
@@ -16,7 +17,7 @@ int main(int argc, char* argv[]) {
     sudoku.loadSudoku(filename);
 
     // Create a brute force serial solver object
-    SerialBacktrackingSolver* solver = new SerialBacktrackingSolver(sudoku);
+    SerialBruteForceSolver* solver = new SerialBruteForceSolver(sudoku);
     solver->solve();
     
     // Load Sudoku from the file and print it
