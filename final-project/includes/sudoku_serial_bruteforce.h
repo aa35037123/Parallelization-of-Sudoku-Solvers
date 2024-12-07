@@ -7,9 +7,8 @@
 
 class SerialBruteForceSolver: public SudokuSolver {
 public:
-    Sudoku* result;
-    SerialBruteForceSolver() : result(nullptr) {}
-    SerialBruteForceSolver(const Sudoku& sudoku) : result(nullptr) {
+    SerialBruteForceSolver();
+    SerialBruteForceSolver(const Sudoku& sudoku){
         init(sudoku);
     }
 

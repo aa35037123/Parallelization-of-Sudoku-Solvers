@@ -2,7 +2,7 @@
 #include "sudoku_serial_backtracking.h"
 #include "sudoku_serial_bruteforce.h"
 #include "sudoku_serial_genetic.h"
-#include "sudoku_parallel_backtracking.h"
+//#include "sudoku_parallel_backtracking.h"
 #include <iostream>
 #include <memory>
 #include <string>
@@ -26,12 +26,6 @@ int main(int argc, char* argv[]) {
     std::string filename;
     std::string algorithmChoice = "parallel_backtracking";  // default algorithm
 
-    // Dynamically allocate the Sudoku grid
-    Sudoku sudoku;
-    sudoku.loadSudoku(filename);
-    
-    // Create a brute force serial solver object
-    SerialBruteForceSolver* solver = new SerialBruteForceSolver(sudoku);
     // Parse command line arguments
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--algorithm") == 0) {
@@ -55,17 +49,19 @@ int main(int argc, char* argv[]) {
     }
 
     // Load the Sudoku puzzle
-    Sudoku sudoku = loadSudoku(filename);
+    Sudoku sudoku;
+    sudoku.loadSudoku(filename);
     std::unique_ptr<SudokuSolver> solver;
 
     // Create the appropriate solver based on the algorithm choice
-    if (algorithmChoice == "parallel_backtracking") {
-        solver = std::make_unique<ParallelBacktrackingSolver>(sudoku);
-    } else if (algorithmChoice == "serial_backtracking") {
+    // if (algorithmChoice == "parallel_backtracking") {
+    //     solver = std::make_unique<ParallelBacktrackingSolver>(sudoku);
+    // } else 
+    if (algorithmChoice == "serial_backtracking") {
         solver = std::make_unique<SerialBacktrackingSolver>(sudoku);
-    } //else if (algorithmChoice == "serial_bruteforce") {
-    //     solver = std::make_unique<SerialBruteForceSolver>(sudoku);
-    // }
+    } else if (algorithmChoice == "serial_bruteforce") {
+        solver = std::make_unique<SerialBruteForceSolver>(sudoku);
+    }
     else {
         std::cerr << "Error: Unknown algorithm '" << algorithmChoice << "'\n";
         printUsage(argv[0]);
@@ -83,6 +79,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Sudoku is " << (valid ? "valid." : "invalid.") << std::endl;
 
     // clear solver
-    deallocateSudoku(*(solver->result));
+    free((solver->result));
+    //deallocateSudoku(*(solver->result));
     return 0;
 }
