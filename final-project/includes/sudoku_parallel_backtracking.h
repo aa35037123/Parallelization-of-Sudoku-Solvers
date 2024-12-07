@@ -7,9 +7,8 @@
 
 class ParallelBacktrackingSolver: public SudokuSolver{
 public:
-    Sudoku* result;
-    ParallelBacktrackingSolver() : result(nullptr) {}
-    ParallelBacktrackingSolver(const Sudoku& sudoku) : result(nullptr) {
+    ParallelBacktrackingSolver();
+    ParallelBacktrackingSolver(const Sudoku& sudoku){
         init(sudoku);
     }
 

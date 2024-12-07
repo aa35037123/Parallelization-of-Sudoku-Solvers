@@ -7,9 +7,8 @@
 
 class SerialBacktrackingSolver: public SudokuSolver{
 public:
-    Sudoku* result;
-    SerialBacktrackingSolver() : result(nullptr) {}
-    SerialBacktrackingSolver(const Sudoku& sudoku) : result(nullptr) {
+    SerialBacktrackingSolver();
+    SerialBacktrackingSolver(const Sudoku& sudoku) {
         init(sudoku);
     }
 

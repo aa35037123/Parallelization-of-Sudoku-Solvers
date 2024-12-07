@@ -20,7 +20,7 @@ void deallocateSudoku(Sudoku sudoku) {
     for (int i = 0; i < sudoku.size; ++i) {
         delete[] sudoku.grid[i];
     }
-    delete[] sudoku.grid;
+    //delete[] sudoku.grid;
 }
 
 Sudoku loadSudoku(const std::string& filename) {
