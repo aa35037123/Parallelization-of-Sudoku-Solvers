@@ -4,7 +4,8 @@
 CXX = g++
 
 # Compiler flags
-CXXFLAGS = -Wall -Wextra -std=c++11 -fsanitize=address
+
+CXXFLAGS = -Wall -Wextra -std=c++11 -fopenmp
 
 # All output target executables
 TARGETS = sudoku_main
@@ -13,12 +14,16 @@ DEPENDENCIES = \
 	./src/sudoku.cpp \
 	./src/sudoku_serial_bruteforce.cpp \
 	./src/sudoku_serial_backtracking.cpp \
-	./src/sudoku_serial_genetic.cpp
+	./src/sudoku_serial_genetic.cpp #\
+	#./src/sudoku_parallel_backtracking.cpp \
+
 
 all: $(TARGETS)
 
 sudoku_main: sudoku_main.cpp $(DEPENDENCIES)
-	$(CXX) $(CXX_FLAGS) $(OPENMP) -I ./includes -o $@ $^
+	$(CXX) $(CXX_FLAGS) -I ./includes -o $@ $^
 
 clean:
 	rm -f $(TARGETS) $(OBJECTS) solution.txt
+
+.PHONY: all clean

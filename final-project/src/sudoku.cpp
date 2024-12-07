@@ -39,7 +39,7 @@ Sudoku::~Sudoku() {
     for (int i = 0; i < size; ++i) {
         delete[] grid[i];
     }
-    delete[] grid;
+    //delete[] grid;
 }
 
 void Sudoku::loadSudoku(const std::string& filename) {

@@ -1,15 +1,13 @@
 #ifndef SUDOKUSERIALBACKTRACKINGSOLVER_H
 #define SUDOKUSERIALBACKTRACKINGSOLVER_H
 
-
 #include "sudoku.h"
 #include "sudoku_solver.h"
 
 class SerialBacktrackingSolver: public SudokuSolver{
 public:
-    Sudoku* result;
-    SerialBacktrackingSolver() : result(nullptr) {}
-    SerialBacktrackingSolver(const Sudoku& sudoku) : result(nullptr) {
+    SerialBacktrackingSolver();
+    SerialBacktrackingSolver(const Sudoku& sudoku) {
         init(sudoku);
     }
 
@@ -25,5 +23,4 @@ private:
     bool find_empty(int &row, int &col) const;
     bool backtracking();
 };
-
 #endif
