@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     // Dynamically allocate the Sudoku grid
     Sudoku sudoku;
     sudoku.loadSudoku(filename);
-
+    
     // Create a brute force serial solver object
     SerialBruteForceSolver* solver = new SerialBruteForceSolver(sudoku);
     // Parse command line arguments

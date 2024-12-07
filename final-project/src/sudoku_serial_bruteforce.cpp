@@ -36,8 +36,8 @@ void SerialBruteForceSolver::solve() {
         row = current.row;
         col = current.col;
         result = current.sudoku;
-        std::cout <<"(row, col): " << row << ", " << col << "\n";
-        result->print();
+        // std::cout <<"(row, col): " << row << ", " << col << "\n";
+        // result->print();
         if (!find_empty(row, col)) {  // auto find the new empty row, col
             std::cout << "Sudoku is solved!\n";
             is_solved = true;
@@ -52,39 +52,6 @@ void SerialBruteForceSolver::solve() {
                 q.push({new_sudoku, row, col});
             }
         }
-        // std::cout << "Hi\n";
-        // delete current.sudoku;
-        // current.sudoku = nullptr;
-    //     // Find the next empty cell
-    //     while (row < result->size && current.sudoku->grid[row][col] != 0) {
-    //         if (++col == result->size) {
-    //             col = 0;
-    //             row++;
-    //         }
-    //     }
-
-    //     // If there are no empty cells left, we have a solution
-    //     if (row == result->size) {
-    //         result = current.sudoku;
-    //         return;
-    //     }
-
-    //     // Try placing numbers 1 to 9 in the empty cell
-    //     for (int num = 1; num <= 9; ++num) {
-    //         if (is_valid(row, col, num)) {
-    //             Sudoku* new_sudoku = new Sudoku();
-    //             new_sudoku->size = current.sudoku->size;
-    //             new_sudoku->grid = new uint8_t*[new_sudoku->size];
-    //             for (int i = 0; i < new_sudoku->size; ++i) {
-    //                 new_sudoku->grid[i] = new uint8_t[new_sudoku->size];
-    //                 for (int j = 0; j < new_sudoku->size; ++j) {
-    //                     new_sudoku->grid[i][j] = current.sudoku->grid[i][j];
-    //                 }
-    //             }
-    //             new_sudoku->grid[row][col] = num;
-    //             q.push({new_sudoku, row, col});
-    //         }
-    //     }
     }
     // if sudoku is solved, then free all sudoku elements in queue
     // avoid doesn't free memory because of break
