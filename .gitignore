@@ -31,5 +31,6 @@
 *.out
 *.app
 
+
 .vscode/
 ./final-project/sudoku_main

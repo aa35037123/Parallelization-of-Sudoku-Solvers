@@ -34,6 +34,8 @@ public:
 
     void allocateGrid();                 // Allocate memory for the grid
     // void deallocateGrid();               // Deallocate memory for the grid
+    void random_empty_cells(int empty_cells); // Randomly empty cells in the grid
+
 };
 
 #endif
