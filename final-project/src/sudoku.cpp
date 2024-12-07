@@ -5,6 +5,9 @@
 #include <cmath>
 #include <stdio.h>
 #include <string.h>
+#include <vector>
+#include <algorithm>
+#include <ctime>
 #include "sudoku.h"
 
 
@@ -129,5 +132,21 @@ void Sudoku::copyFrom(const Sudoku& other) {
     }
     for (int i = 0; i < size; ++i) {
         memcpy(grid[i], other.grid[i], size * sizeof(uint8_t));
+    }
+}
+
+void Sudoku::random_empty_cells(int empty_cells) {
+    std::vector<int> empty_indices;
+    for (int i = 0; i < size; ++i) {
+        for (int j = 0; j < size; ++j) {
+            empty_indices.push_back(i * size + j);
+        }
+    }
+    std::srand(std::time(0));
+    std::random_shuffle(empty_indices.begin(), empty_indices.end());
+    for (int i = 0; i < empty_cells; ++i) {
+        int row = empty_indices[i] / size;
+        int col = empty_indices[i] % size;
+        grid[row][col] = 0;
     }
 }

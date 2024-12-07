@@ -51,19 +51,28 @@ void Candidate::update_fitness() {
 void Candidate::mutate(int mutate_grids, const std::vector<std::vector<uint8_t>>& given) {
     unsigned int seed = 42;
     double r;
-    int real_mutate_grids = rand() % mutate_grids;
+    int real_mutate_grids = (rand() % (mutate_grids-1)) + 1;
+    // std::cout << "Mutating\n";
+    // sudoku.print();
+    // std::cout << "Mutating " << real_mutate_grids << " grids\n";
     for (int i = 0; i < real_mutate_grids; ++i) {
         int row = rand_r(&seed) % sudoku.size;
-        if (given[row].size() == 0 || given[row].size() == 1) {
-            continue;
+        while (given[row].size() == 0 || given[row].size() == 1) {
+            row = rand_r(&seed) % sudoku.size;
         }
         int column1 = rand_r(&seed) % given[row].size();
         int column2 = rand_r(&seed) % given[row].size();
         while (column1 == column2) {
             column2 = rand_r(&seed) % given[row].size();
         }
-        std::swap(sudoku.grid[row][column1], sudoku.grid[row][column2]);
+        column1 = given[row][column1];
+        column2 = given[row][column2];
+        uint8_t temp = sudoku.grid[row][column1];
+        sudoku.grid[row][column1] = sudoku.grid[row][column2];
+        sudoku.grid[row][column2] = temp;
     }
+    // sudoku.print();
+
 }
 
 void Candidate::crossover(const Candidate& parent1, double crossover_portion) {
@@ -202,7 +211,7 @@ void Population::mutate(int mutate_amount, int mutate_grids, const std::vector<s
         int index = rand() % filled_indices.size();
         int fill_index = empty_indices.back();
         
-        std::cout << "from " << index << " to " << fill_index << "\n";
+        // std::cout << "from " << index << " to " << fill_index << "\n";
         empty_indices.pop_back();
         population[fill_index]->sudoku.copyFrom(population[filled_indices[index]]->sudoku);
         population[fill_index]->mutate(mutate_grids, given);
@@ -211,6 +220,28 @@ void Population::mutate(int mutate_amount, int mutate_grids, const std::vector<s
 }
 
 void Population::evolve(int selection_size, int crossover_amount, double crossover_portion, int mutate_amount, int mutate_grids, const std::vector<std::vector<uint8_t>>& given) {
+    // for (int i = 0; i < population_size; ++i) {
+    //     population[i]->update_fitness();
+    //     if (population[i]->fitness > best_fitness) {
+    //         best_fitness = population[i]->fitness;
+    //         best_index = i;
+    //     }
+    // }
+    // print_fitness_statistics();
+    // std::cout << "Fitness updated\n";
+    selection(selection_size);
+    // print_filled_indeces();
+    // print_empty_indices();
+    // std::cout << "filled:\n";
+    // print_vector_statistics(filled_indices);
+    // std::cout << "empty:\n";
+    // print_vector_statistics(empty_indices);
+    // std::cout << "Mutation done\n";
+    crossover(crossover_amount, crossover_portion);
+    // std::cout << "Selection done\n";
+    mutate(mutate_amount, mutate_grids, given);
+    std::cout << "Mutate done\n";
+    // std::cout << "Crossover done\n";
     for (int i = 0; i < population_size; ++i) {
         population[i]->update_fitness();
         if (population[i]->fitness > best_fitness) {
@@ -218,28 +249,15 @@ void Population::evolve(int selection_size, int crossover_amount, double crossov
             best_index = i;
         }
     }
-    print_fitness_statistics();
-    // std::cout << "Fitness updated\n";
-    selection(selection_size);
-    print_filled_indeces();
-    print_empty_indices();
-    std::cout << "filled:\n";
-    print_vector_statistics(filled_indices);
-    std::cout << "empty:\n";
-    print_vector_statistics(empty_indices);
-    // std::cout << "Mutation done\n";
-    crossover(crossover_amount, crossover_portion);
-    // std::cout << "Selection done\n";
-    mutate(mutate_amount, mutate_grids, given);
-    
-    // std::cout << "Crossover done\n";
-    
+
     generation++;
 }
 
 
-SerialGeneticSolver::SerialGeneticSolver(const Sudoku& sudoku) {
+SerialGeneticSolver::SerialGeneticSolver(Sudoku& sudoku) {
     std::cout << "SerialGeneticSolver constructor\n";
+    sudoku.random_empty_cells(empty_count);
+    sudoku.print();
     for (int i = 0; i < sudoku.size; ++i) {
         std::vector<uint8_t> row;
         std::vector<bool> row_miss(sudoku.size);
@@ -269,9 +287,10 @@ Sudoku SerialGeneticSolver::solve() {
         if (population->population[population->best_index]->sudoku.isValid()) {
             break;
         }
+        // population->population[population->best_index]->sudoku.print();
 
         std::cout << "Fitness: " << population->best_fitness << "\n";
-        // if (population->generation == 10)
+        // if (population->generation == 3)
         //     break;
         // if (population->generation > 10) {
         //     break;

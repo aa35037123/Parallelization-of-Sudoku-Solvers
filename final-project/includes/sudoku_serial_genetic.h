@@ -43,7 +43,7 @@ public:
     int population_size;
     int generation = 0;
     int best_index = 0;
-    int best_fitness = 0;
+    int best_fitness = -10000;
 
     Population(int population_size, const Sudoku& sudoku);
 
@@ -73,13 +73,14 @@ public:
     std::vector<std::vector<uint8_t>> given;
     Population* population;
     int population_size = 150;
-    int selection_size = 50;
-    int crossover_amount = 50;
+    int selection_size = 100;
+    int crossover_amount = 25;
     double crossover_portion = 0.5;
-    int mutate_amount = 50;
-    int mutate_grids = 5;
+    int mutate_amount = 25;
+    int mutate_grids = 3;
+    int empty_count = 15;
 
-    SerialGeneticSolver(const Sudoku& sudoku);
+    SerialGeneticSolver(Sudoku& sudoku);
 
     ~SerialGeneticSolver() {
         delete population;
