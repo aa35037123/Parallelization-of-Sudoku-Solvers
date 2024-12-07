@@ -17,7 +17,8 @@ int main(int argc, char* argv[]) {
     sudoku.loadSudoku(filename);
     
     // Create a brute force serial solver object
-    SerialBruteForceSolver* solver = new SerialBruteForceSolver(sudoku);
+    // SerialBruteForceSolver* solver = new SerialBruteForceSolver(sudoku);
+    SerialBacktrackingSolver* solver = new SerialBacktrackingSolver(sudoku);
     solver->solve();
     
     // Load Sudoku from the file and print it

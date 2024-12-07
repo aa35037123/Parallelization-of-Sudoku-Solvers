@@ -26,12 +26,13 @@ bool SerialBacktrackingSolver::backtracking() {
     if (!find_empty(row, col)) {
         return true;  // No empty cells left, puzzle is solved
     }
-
+    // std::cout <<"(row, col): " << row << ", " << col << "\n";
+    // result->print();
     // Try placing numbers 1 to 9 in the empty cell
-    for (int num = 1; num <= 9; ++num) {
+    for (int num = 1; num <= result->size; ++num) {
         if (is_valid(row, col, num)) {
             result->grid[row][col] = num;
-
+            
             // Recursively attempt to solve the rest of the puzzle
             if (backtracking()) {
                 return true;
