@@ -1,6 +1,7 @@
 #include "sudoku_serial_genetic.h"
 #include <set>
 #include <map>
+
 #include <algorithm>
 #include <random>
 #include <cmath>
@@ -23,6 +24,7 @@ void Candidate::update_fitness() {
         for (int j = 0; j < sudoku.size; ++j) {
             if (column_count[j] > 1) {
                 column_sum += 1.0; /// (column_count[j]);
+
             }
         }
         std::fill(column_count.begin(), column_count.end(), 0);
@@ -46,6 +48,7 @@ void Candidate::update_fitness() {
     }
 
     fitness = - column_sum - block_sum;
+
 }
 
 void Candidate::mutate(int mutate_grids, const std::vector<std::vector<uint8_t>>& given) {
@@ -72,6 +75,7 @@ void Candidate::mutate(int mutate_grids, const std::vector<std::vector<uint8_t>>
         sudoku.grid[row][column2] = temp;
     }
     // sudoku.print();
+
 
 }
 
@@ -103,6 +107,7 @@ void Candidate::initialize() {
         }
         // std::cout << "Row initialized\n";
         for (uint8_t j = 0; j < sudoku.size; ++j) {
+
             if (row[j]) {
                 row_miss.push_back(j+1);
             }
@@ -202,6 +207,7 @@ void Population::crossover(int crossover_amount, double crossover_portion){
         population[fill_index]->sudoku.copyFrom(population[filled_indices[index1]]->sudoku);
         population[fill_index]->crossover(*population[filled_indices[index2]], crossover_portion);
         filled_indices.push_back(fill_index);
+
     }
 }
 
@@ -216,6 +222,7 @@ void Population::mutate(int mutate_amount, int mutate_grids, const std::vector<s
         population[fill_index]->sudoku.copyFrom(population[filled_indices[index]]->sudoku);
         population[fill_index]->mutate(mutate_grids, given);
         filled_indices.push_back(fill_index);
+
     }
 }
 
@@ -300,3 +307,4 @@ Sudoku SerialGeneticSolver::solve() {
     result.copyFrom(population->population[population->best_index]->sudoku);
     return result;
 }
+

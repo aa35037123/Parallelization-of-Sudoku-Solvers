@@ -16,21 +16,15 @@ int main(int argc, char* argv[]) {
     Sudoku sudoku;
     sudoku.loadSudoku(filename);
 
-    std::cout << "Sudoku puzzle loaded from " << filename << ":\n";
-    sudoku.print();
-
     // Create a brute force serial solver object
-    SerialGeneticSolver* solver = new SerialGeneticSolver(sudoku);
-
-    std::cout << "Solving Sudoku using Genetic Algorithm...\n";
-
-    Sudoku result = solver->solve();
+    SerialBruteForceSolver* solver = new SerialBruteForceSolver(sudoku);
+    solver->solve();
     
     // Load Sudoku from the file and print it
     std::cout << "Sudoku puzzle loaded from " << filename << ":\n";
-    result.print();
+    solver->result->print();
 
-    bool valid = result.isValid();
+    bool valid = solver->result->isValid();
     std::cout << "Sudoku is " << (valid ? "valid." : "invalid.") << std::endl;
 
     // Clean up memory

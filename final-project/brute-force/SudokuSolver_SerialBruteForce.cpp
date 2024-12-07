@@ -45,7 +45,8 @@ bool solve() {
     }
 
     // Try placing numbers 1 to 9 in the empty cell
-    for (int num = 1; num <= 9; ++num) {
+
+    for (int num = 1; num <= result->size; ++num) {
         if (is_valid(row, col, num)) {
             result->grid[row][col] = num;
 

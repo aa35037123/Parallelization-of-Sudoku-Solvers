@@ -20,13 +20,12 @@ Sudoku::Sudoku(int size) : size(size) {
 }
 
 Sudoku::Sudoku(int size, uint8_t** grid) : size(size) {
+
     allocateGrid();
     for (int i = 0; i < size; ++i) {
         memcpy(this->grid[i], grid[i], size * sizeof(uint8_t));
     }
-    // std::cout << "In sudoku constructor\n";
-    // std::cout << "Size: " << size << "\n";
-    // print();
+
 }
 
 void Sudoku::allocateGrid() {

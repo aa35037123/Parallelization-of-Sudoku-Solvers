@@ -8,11 +8,13 @@
 class Candidate {
 public:
     Sudoku sudoku;
+
     double fitness = 0;
     // Candidate(Sudoku sudoku){
     //     this->sudoku = Sudoku(sudoku.size, sudoku.grid);
     // };
     Candidate(const Sudoku& sudoku) : sudoku(sudoku.size, sudoku.grid) {}
+
 
     Candidate(const Candidate& other) {
         this->sudoku = Sudoku(other.sudoku.size, other.sudoku.grid);
