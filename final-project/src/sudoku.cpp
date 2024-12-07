@@ -5,6 +5,9 @@
 #include <cmath>
 #include <stdio.h>
 #include <string.h>
+#include <vector>
+#include <algorithm>
+#include <ctime>
 #include "sudoku.h"
 
 
@@ -16,11 +19,13 @@ Sudoku::Sudoku(int size) : size(size) {
     allocateGrid();
 }
 
-Sudoku::Sudoku(int size, uint8_t** grid) : size(size), grid(grid) {
+Sudoku::Sudoku(int size, uint8_t** grid) : size(size) {
+
     allocateGrid();
     for (int i = 0; i < size; ++i) {
         memcpy(this->grid[i], grid[i], size * sizeof(uint8_t));
     }
+
 }
 
 void Sudoku::allocateGrid() {
@@ -116,8 +121,31 @@ bool Sudoku::isValid() const {
 }
 
 void Sudoku::copyFrom(const Sudoku& other) {
-    if (size != other.size) return;  // Ensure sizes are compatible
+    if (grid == nullptr) {
+        size = other.size;
+        allocateGrid();
+    } 
+    else if (size != other.size){
+        std::cerr << "Grid sizes do not match when copying.\n";
+        return;
+    }
     for (int i = 0; i < size; ++i) {
         memcpy(grid[i], other.grid[i], size * sizeof(uint8_t));
+    }
+}
+
+void Sudoku::random_empty_cells(int empty_cells) {
+    std::vector<int> empty_indices;
+    for (int i = 0; i < size; ++i) {
+        for (int j = 0; j < size; ++j) {
+            empty_indices.push_back(i * size + j);
+        }
+    }
+    std::srand(std::time(0));
+    std::random_shuffle(empty_indices.begin(), empty_indices.end());
+    for (int i = 0; i < empty_cells; ++i) {
+        int row = empty_indices[i] / size;
+        int col = empty_indices[i] % size;
+        grid[row][col] = 0;
     }
 }
