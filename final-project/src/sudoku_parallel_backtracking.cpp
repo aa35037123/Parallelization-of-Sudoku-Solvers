@@ -5,6 +5,7 @@
 #include "sudoku_serial_backtracking.h"
 #define NUM_THREADS 4
 
+
 // extern Sudoku* result;
 
 bool SerialBacktrackingSolverForParallel::solve2() {
