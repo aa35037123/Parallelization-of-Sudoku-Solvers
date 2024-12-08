@@ -3,6 +3,7 @@
 #include <omp.h>
 #include "sudoku_parallel_backtracking.h"
 #include "sudoku_serial_backtracking.h"
+#define NUM_THREADS 4
 
 // extern Sudoku* result;
 
@@ -40,6 +41,9 @@ bool SerialBacktrackingSolverForParallel::backtracking() {
 
 
 void ParallelBacktrackingSolver::init(const Sudoku& sudoku) {
+    omp_set_dynamic(0);
+    omp_set_num_threads(NUM_THREADS);
+            
     result = new Sudoku();
     result->size = sudoku.size;
     result->grid = new uint8_t*[sudoku.size];
