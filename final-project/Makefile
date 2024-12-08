@@ -21,7 +21,7 @@ DEPENDENCIES = \
 all: $(TARGETS)
 
 sudoku_main: sudoku_main.cpp $(DEPENDENCIES)
-	$(CXX) $(CXX_FLAGS) -I ./includes -o $@ $^
+	$(CXX) $(CXXFLAGS) -I ./includes -o $@ $^
 
 clean:
 	rm -f $(TARGETS) $(OBJECTS) solution.txt
