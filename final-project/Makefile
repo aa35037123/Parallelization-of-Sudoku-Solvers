@@ -5,7 +5,7 @@ CXX = g++
 
 # Compiler flags
 
-CXXFLAGS = -Wall -Wextra -std=c++11 -fopenmp
+CXXFLAGS = -Wall -Wextra -std=c++17 -fopenmp
 
 # All output target executables
 TARGETS = sudoku_main
@@ -22,7 +22,7 @@ DEPENDENCIES = \
 all: $(TARGETS)
 
 sudoku_main: sudoku_main.cpp $(DEPENDENCIES)
-	$(CXX) $(CXX_FLAGS) -I ./includes -o $@ $^
+	$(CXX) $(CXXFLAGS) -I ./includes -o $@ $^
 
 clean:
 	rm -f $(TARGETS) $(OBJECTS) solution.txt
