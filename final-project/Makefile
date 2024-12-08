@@ -14,8 +14,8 @@ DEPENDENCIES = \
 	./src/sudoku.cpp \
 	./src/sudoku_serial_bruteforce.cpp \
 	./src/sudoku_serial_backtracking.cpp \
-	./src/sudoku_serial_genetic.cpp #\
-	#./src/sudoku_parallel_backtracking.cpp \
+	./src/sudoku_serial_genetic.cpp \
+	./src/sudoku_parallel_backtracking.cpp \
 
 
 all: $(TARGETS)

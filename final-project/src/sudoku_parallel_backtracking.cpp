@@ -2,8 +2,42 @@
 #include <cmath>
 #include <omp.h>
 #include "sudoku_parallel_backtracking.h"
+#include "sudoku_serial_backtracking.h"
 
-extern Sudoku* result;
+// extern Sudoku* result;
+
+bool SerialBacktrackingSolverForParallel::solve2() {
+    return backtracking();
+}
+
+bool SerialBacktrackingSolverForParallel::backtracking() {
+    if (*solved) {
+        return true;
+    }
+
+    int row, col;
+
+    // Find the next empty cell
+    if (!find_empty(row, col)) {
+        *solved = true;
+        return true;  // No empty cells left, puzzle is solved
+    }
+
+    for (int num = 1; num <= result->size; ++num) {
+        if (is_valid(row, col, num)) {
+            result->grid[row][col] = num;
+
+            if (backtracking()) {
+                return true;
+            }
+
+            // Backtrack
+            result->grid[row][col] = 0;
+        }
+    }
+    return false;
+}
+
 
 void ParallelBacktrackingSolver::init(const Sudoku& sudoku) {
     result = new Sudoku();
@@ -15,6 +49,40 @@ void ParallelBacktrackingSolver::init(const Sudoku& sudoku) {
             result->grid[i][j] = sudoku.grid[i][j];
         }
     }
+
+    
+    std::vector<Sudoku*> initial_choices = generate_initial_choices(result);
+    bool *done = new bool(false);
+    for (Sudoku* choice : initial_choices) {
+        SerialBacktrackingSolverForParallel solver(*choice);
+        solver.solved = done;
+        solvers.push_back(solver);
+    }
+}
+
+std::vector<Sudoku*> ParallelBacktrackingSolver::generate_initial_choices(const Sudoku* local_result) {
+    std::vector<Sudoku*> initial_choices;
+    int row, col;
+    if (!find_empty(row, col, local_result)) {
+        return initial_choices;
+    }
+
+    for (int num = 1; num <= local_result->size; ++num) {
+        if (is_valid(row, col, num, local_result)) {
+            Sudoku* choice = new Sudoku();
+            choice->size = local_result->size;
+            choice->grid = new uint8_t*[local_result->size];
+            for (int i = 0; i < local_result->size; ++i) {
+                choice->grid[i] = new uint8_t[local_result->size];
+                for (int j = 0; j < local_result->size; ++j) {
+                    choice->grid[i][j] = local_result->grid[i][j];
+                }
+            }
+            choice->grid[row][col] = num;
+            initial_choices.push_back(choice);
+        }
+    }
+    return initial_choices;
 }
 
 void ParallelBacktrackingSolver::solve() {
@@ -25,38 +93,19 @@ void ParallelBacktrackingSolver::solve() {
     //     return;  // No empty cells, puzzle is already solved
     // }
 
-    bool solution_found = false;
-
-    // Parallelize the initial choices for the first empty cell
-    #pragma omp parallel for shared(solution_found)
-    for (int num = 1; num <= 9; ++num) {
-        if (solution_found) continue;  // Stop if another thread has found a solution
-        
-        Sudoku* local_result = new Sudoku();
-        local_result->size = result->size;
-        local_result->grid = new uint8_t*[result->size];
-        for (int i = 0; i < result->size; ++i) {
-            local_result->grid[i] = new uint8_t[result->size];
-            for (int j = 0; j < result->size; ++j) {
-                local_result->grid[i][j] = result->grid[i][j];
+    int idx = -1;
+    #pragma omp parallel for reduction(+:idx)
+    for (int num = 0; num < solvers.size(); ++num) {
+        if (idx == -1) {
+            bool found = solvers[num].solve2();
+            if (found) {
+                idx = num;
             }
         }
+    }
 
-        if (is_valid(row, col, num, local_result)) {
-            local_result->grid[row][col] = num;
-
-            // Recursively solve using this initial choice
-            if (backtracking(local_result)) {
-                #pragma omp critical
-                {
-                    if (!solution_found) {
-                        solution_found = true;
-                        copy_result(local_result);
-                    }
-                }
-            }
-        }
-        cleanup(local_result);  // Free memory allocated for local_result
+    if (idx != -1) {
+        copy_result(solvers[idx].result);
     }
 }
 
@@ -130,6 +179,7 @@ void ParallelBacktrackingSolver::cleanup(Sudoku* local_result) {
     delete[] local_result->grid;
     delete local_result;
 }
+
 void ParallelBacktrackingSolver::display() const {
 
     #pragma omp parallel for
