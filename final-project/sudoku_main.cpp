@@ -3,6 +3,7 @@
 #include "sudoku_serial_bruteforce.h"
 #include "sudoku_serial_genetic.h"
 #include "sudoku_parallel_backtracking.h"
+#include "sudoku_parallel_backtracking_multiblocks.h"
 #include <iostream>
 #include <memory>
 #include <string>
@@ -67,7 +68,10 @@ int main(int argc, char* argv[]) {
             // solver = std::make_unique<SerialGeneticSolver>(sudoku);
             break;
         case 4:
-            solver = std::make_unique<ParallelBacktrackingSolver>(sudoku);
+            // solver = std::make_unique<ParallelBacktrackingSolver>(sudoku);
+        case 5:
+            solver = std::make_unique<ParallelBacktrackingMultiBlocksSolver>(sudoku);
+            break;
         default:
             std::cerr << "Error: Unknown algorithm number '" << algorithmChoice << "'\n";
             printUsage(argv[0]);
