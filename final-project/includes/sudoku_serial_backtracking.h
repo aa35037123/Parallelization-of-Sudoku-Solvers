@@ -19,7 +19,6 @@ public:
 
     void display() const;
 
-private:
     bool find_empty(int &row, int &col) const;
     bool backtracking();
 };

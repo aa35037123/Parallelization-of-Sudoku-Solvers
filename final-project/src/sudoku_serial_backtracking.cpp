@@ -2,7 +2,7 @@
 #include <cmath>
 #include "sudoku_serial_backtracking.h"
 
-extern Sudoku* result;
+// extern Sudoku* result;
 
 void SerialBacktrackingSolver::init(const Sudoku& sudoku) {
     result = new Sudoku();
