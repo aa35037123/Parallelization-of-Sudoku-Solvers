@@ -21,8 +21,6 @@ public:
 
 private:
     struct State {
-        int row;
-        int col;  
         uint8_t num;
     };
 };
