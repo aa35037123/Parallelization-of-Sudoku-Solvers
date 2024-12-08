@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <cstring>
+#include "CycleTimer.h"
 
 void printUsage(const char* programName) {
     std::cerr << "Usage: " << programName << " <path_to_sudoku_file> [--algorithm <number>]\n"
@@ -55,6 +56,8 @@ int main(int argc, char* argv[]) {
     sudoku.loadSudoku(filename);
     std::unique_ptr<SudokuSolver> solver;
 
+    double startTime = CycleTimer::currentSeconds();
+
     // Create the appropriate solver based on the algorithm choice
     switch (algorithmChoice) {
         case 1: // Serial backtracking
@@ -75,6 +78,9 @@ int main(int argc, char* argv[]) {
     }
 
     solver->solve();
+
+    double endTime = CycleTimer::currentSeconds();
+    std::cout << "Time: " << (endTime - startTime) * 1000 << " ms\n";
     
     // Print results
     std::cout << "Using algorithm: " << algorithmChoice << "\n";
