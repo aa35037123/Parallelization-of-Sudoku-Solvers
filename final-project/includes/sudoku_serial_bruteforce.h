@@ -16,14 +16,12 @@ public:
     void solve() override;
     void display() const;
 
-    bool is_valid(int row, int col, int num) const;
-    bool find_empty(int &row, int &col) const;
+    bool is_valid(int row, int col, int num, Sudoku& sudoku) const;
+    bool find_empty(int &row, int &col, Sudoku& sudoku) const;
 
 private:
     struct State {
-        Sudoku* sudoku;
-        int row;  // current row in observation
-        int col;  // current col in observation
+        uint8_t num;
     };
 };
 
