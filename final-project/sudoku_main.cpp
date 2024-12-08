@@ -54,22 +54,27 @@ int main(int argc, char* argv[]) {
     Sudoku sudoku;
     sudoku.loadSudoku(filename);
     std::unique_ptr<SudokuSolver> solver;
+    std::string algorithmName;
 
     // Create the appropriate solver based on the algorithm choice
     switch (algorithmChoice) {
         case 1: // Serial backtracking
             solver = std::make_unique<SerialBacktrackingSolver>(sudoku);
+            algorithmName = "Serial backtracking (DFS)";
             break;
         case 2: // Serial brute force
             solver = std::make_unique<SerialBruteForceSolver>(sudoku);
+            algorithmName = "Serial bruteforce (BFS)";
             break;
         case 3: // Serial genetic algorithm
             // solver = std::make_unique<SerialGeneticSolver>(sudoku);
             break;
         case 4:
-            solver = std::make_unique<ParallelBacktrackingSolver>(sudoku);
+            //solver = std::make_unique<ParallelBacktrackingSolver>(sudoku);
+            break;
         default:
             std::cerr << "Error: Unknown algorithm number '" << algorithmChoice << "'\n";
+            algorithmName = "Unknown";
             printUsage(argv[0]);
             return 1;
     }
@@ -77,8 +82,8 @@ int main(int argc, char* argv[]) {
     solver->solve();
     
     // Print results
-    std::cout << "Using algorithm: " << algorithmChoice << "\n";
-    std::cout << "Sudoku puzzle loaded from " << filename << ":\n";
+    std::cout << "Using algorithm: " << algorithmName << "\n";
+    std::cout << "Sudoku puzzle loaded from: " << filename << "\n";
     solver->result->print();
 
     bool valid = solver->result->isValid();

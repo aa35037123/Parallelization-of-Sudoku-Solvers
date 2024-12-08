@@ -3,7 +3,9 @@
 #include <queue>
 #include <utility>
 #include <memory>
+#include <vector>
 #include "sudoku_serial_bruteforce.h"
+using namespace std;
 
 extern Sudoku* result;
 
@@ -23,61 +25,82 @@ void SerialBruteForceSolver::solve() {
     int row = 0;
     int col = 0;
 
-    std::cout << "In solving...\n";
-    std::queue<State> q; // state: previous find row and column and number
+    std::queue<vector<State>> q; // state: previous find row and column and number
+    Sudoku* blank_sudoku = new Sudoku();
+    blank_sudoku->copyFrom(*result);
+    //= new Sudoku(result->size, result->grid);
     // q.push(std::make_pair(row, col));
-    q.push({result, row, col});
-    bool is_solved = false;
+    // push first cell state
+    bool is_solved = !find_empty(row, col, *blank_sudoku);
+    //std::cout << row << " " << col << "\n";
+    if (!is_solved) {
+        for (uint8_t num = 1; num <= result->size; num++) {
+            if (is_valid(row, col, num, *blank_sudoku)) {
+                vector<State> s = {{row, col, num}};
+                q.push(s);
+            }
+        }
+    }
     while (!q.empty() && !is_solved) {
-        // std::cout << "In while...\n";
+        //std::cout << "In while...\n";
         // std::pair<int, int> current = q.front();
-        State current = q.front();
+        vector<State> current = q.front();
         q.pop();
-        row = current.row;
-        col = current.col;
-        result = current.sudoku;
+        for (int i = 0; i < current.size(); i++)
+            blank_sudoku->grid[current[i].row][current[i].col] = current[i].num;
         // std::cout <<"(row, col): " << row << ", " << col << "\n";
         // result->print();
-        if (!find_empty(row, col)) {  // auto find the new empty row, col
-            std::cout << "Sudoku is solved!\n";
+        row = current[current.size() - 1].row;
+        col = current[current.size() - 1].col;
+        if (!find_empty(row, col, *blank_sudoku)) {  // auto find the new empty row, col
+            //blank_sudoku->print();
             is_solved = true;
             break;
         } 
         // current.sudoku->print();
-        for(int num = 1; num <= result->size; num++){
-            if(is_valid(row, col, num)){
-                Sudoku* new_sudoku = new Sudoku(result->size, current.sudoku->grid);
-                // new_sudoku->copyFrom(*current.sudoku);
-                new_sudoku->grid[row][col] = num;
-                q.push({new_sudoku, row, col});
+        for(uint8_t num = 1; num <= result->size; num++){
+
+            if(is_valid(row, col, num, *blank_sudoku)){
+                current.push_back({row, col, num});
+                q.push(current);
+                current.pop_back();
             }
         }
+        //blank_sudoku->print();
+        for (int i = 0; i < current.size(); i++)
+            blank_sudoku->grid[current[i].row][current[i].col] = 0;
     }
     // if sudoku is solved, then free all sudoku elements in queue
     // avoid doesn't free memory because of break
     while (!q.empty()) {
-        State current = q.front();
+        vector<State> current = q.front();
         q.pop();
-        delete current.sudoku;
+        current.clear();
     }
+    for (int i = 0;i<result->size;i++){
+        for(int j = 0;j<result->size;j++){
+            result->grid[i][j] = blank_sudoku->grid[i][j];
+        }
+    }
+    delete blank_sudoku;
 }
 
-bool SerialBruteForceSolver::is_valid(int row, int col, int num) const {
+bool SerialBruteForceSolver::is_valid(int row, int col, int num, Sudoku& ref) const {
     // Check row and column for conflicts
-    for (int i = 0; i < result->size; ++i) {
-        if (result->grid[row][i] == num || result->grid[i][col] == num) {
+    for (int i = 0; i < ref.size; ++i) {
+        if (ref.grid[row][i] == num || ref.grid[i][col] == num) {
             return false;
         }
     }
 
     // Check the subgrid for conflicts
-    int grid_length = sqrt(result->size);
+    int grid_length = sqrt(ref.size);
     int startRow = (row / grid_length) * grid_length;
     int startCol = (col / grid_length) * grid_length;
 
     for (int i = 0; i < grid_length; ++i) {
         for (int j = 0; j < grid_length; ++j) {
-            if (result->grid[startRow + i][startCol + j] == num) {
+            if (ref.grid[startRow + i][startCol + j] == num) {
                 return false;
             }
         }
@@ -95,10 +118,11 @@ void SerialBruteForceSolver::display() const {
 }
 
 
-bool SerialBruteForceSolver::find_empty(int &row, int &col) const {
+bool SerialBruteForceSolver::find_empty(int &row, int &col, Sudoku& s) const {
     for (row = 0; row < result->size; ++row) {
         for (col = 0; col < result->size; ++col) {
-            if (result->grid[row][col] == 0) {\
+            if (s.grid[row][col] == 0) {
+                //std::cout << "Found empty cell\n";
                 return true;  // Found an empty cell
             }
         }
