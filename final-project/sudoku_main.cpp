@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
             // solver = std::make_unique<SerialGeneticSolver>(sudoku);
             break;
         case 4:
-            // solver = std::make_unique<ParallelBacktrackingSolver>(sudoku);
+            solver = std::make_unique<ParallelBacktrackingSolver>(sudoku);
         case 5:
             solver = std::make_unique<ParallelBacktrackingMultiBlocksSolver>(sudoku);
             break;

@@ -5,7 +5,7 @@ CXX = g++
 
 # Compiler flags
 
-CXXFLAGS = -Wall -Wextra -std=c++11 -fopenmp
+CXX_FLAGS = -Wall -Wextra -std=c++11 -fopenmp
 
 # All output target executables
 TARGETS = sudoku_main
