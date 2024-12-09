@@ -60,6 +60,7 @@ void ParallelBacktrackingSolver::init(const Sudoku& sudoku) {
     bool *done = new bool(false);
     for (Sudoku* choice : initial_choices) {
         SerialBacktrackingSolverForParallel solver(*choice);
+        std::cout << "Creating solver" << std::endl;
         solver.solved = done;
         solvers.push_back(solver);
     }
