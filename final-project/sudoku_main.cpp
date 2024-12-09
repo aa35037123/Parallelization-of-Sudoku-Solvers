@@ -75,6 +75,7 @@ int main(int argc, char* argv[]) {
             break;
         case 4:
             solver = std::make_unique<ParallelBacktrackingSolver>(sudoku);
+            algorithmName = "Parallel backtracking (DFS)";
             break;
         case 5:
             solver = std::make_unique<ParallelBacktrackingMultiBlocksSolver>(sudoku);

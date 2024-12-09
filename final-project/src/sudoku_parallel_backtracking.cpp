@@ -112,6 +112,7 @@ void ParallelBacktrackingSolver::solve() {
 
     if (idx != -1) {
         copy_result(solvers[idx]->result);
+        std::cout << "Solved by solver " << idx << std::endl;
     }
 }
 
