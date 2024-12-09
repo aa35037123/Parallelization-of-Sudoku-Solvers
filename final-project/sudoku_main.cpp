@@ -77,14 +77,14 @@ int main(int argc, char* argv[]) {
             break;
         case 4:
             solver = std::make_unique<ParallelBacktrackingSolver>(sudoku);
-            algorithmName = "Parallel backtracking";
+            algorithmName = "Parallel backtracking (DFS)";
             break;
         case 5:
             solver = std::make_unique<ParallelBacktrackingMultiBlocksSolver>(sudoku);
             break;
         case 6:
             solver = std::make_unique<OMPParallelBruteForceSolver>(sudoku);
-            algorithmName = "Parallel OMP bruteforce";
+            algorithmName = "Parallel OMP bruteforce (BFS)";
             break;
         default:
             std::cerr << "Error: Unknown algorithm number '" << algorithmChoice << "'\n";

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cmath>
 #include <stack>
+#include <deque>
 #include <omp.h>
 #include "sudoku_parallel_backtracking_multiblocks.h"
 
@@ -16,64 +17,113 @@ void ParallelBacktrackingMultiBlocksSolver::init(const Sudoku& sudoku) {
             result->grid[i][j] = sudoku.grid[i][j];
         }
     }
+
+    // Initialize the queue lock
+    omp_init_lock(&queue_lock);
+    solved = false;
+    int row, col;
+    if(find_empty(result, row, col)){
+        board_queue.push_back({result, row, col});
+    } else {
+        board_queue.push_back({result, -1, -1});
+    }
 }
 
 void ParallelBacktrackingMultiBlocksSolver::solve() {
-    backtracking();
+    int iterations = 5;
+    bootstrap(iterations); // generate possible boards
+    parallel_backtracking();  // Each thread can take all possible sudoku in pool, and execute it 
 }
-void ParallelBacktrackingMultiBlocksSolver::backtracking() {
-    std::stack<State> stack; // Stack to store Sudoku states
-    int row, col;
+void ParallelBacktrackingMultiBlocksSolver::bootstrap(int iterations){
+    // while (!board_queue.empty() && !solved)
+    // {
+        State current = board_queue.front();
+        board_queue.pop_front();
+        if (current.row == -1 || current.col == -1) {
+            return;
+        }
+        Sudoku* board = current.board;
+        int row = current.row;
+        int col = current.col;
+        for (int num = 1; num <= board->size; ++num) {
+            if (is_valid(board, row, col, num)) {
+                Sudoku* new_board = new Sudoku(*board);
+                new_board->grid[row][col] = num;
 
-    // Find the first empty cell
-    if (!find_empty(row, col)) {
-        return; // No empty cells, puzzle already solved
-    }
-
-    stack.push({row, col, 1}); // Start with the first empty cell and number 1
-
-    while (!stack.empty()) {
-        State current = stack.top();
-        stack.pop();
-
-        // If the current number is valid, place it
-        if (current.num <= result->size && is_valid(current.row, current.col, current.num)) {
-            result->grid[current.row][current.col] = current.num;
-
-            // Find the next empty cell
-            if (!find_empty(row, col)) {
-                return; // Puzzle solved
+                int next_row, next_col;
+                if (find_empty(new_board, next_row, next_col)) {
+                    board_queue.push_back({new_board, next_row, next_col});
+                } else {
+                    if (!solved) {
+                        solved = true;
+                        copy_result(new_board);
+                        cleanup(new_board);
+                        break;
+                    }
+                }
             }
+        }
+        cleanup(board);
+    // }
+    
+}
+void ParallelBacktrackingMultiBlocksSolver::parallel_backtracking() {
+    // In openmp, we can not use break, we must traverse all the elements in the queue
+    #pragma omp parallel shared(board_queue, solved)
+    {
+        while(!solved){
+            omp_set_lock(&queue_lock);
+            if (board_queue.empty()) {  // No work to do
+                omp_unset_lock(&queue_lock);
+                continue;
+            }
+            State current = board_queue.front();
+            board_queue.pop_front();
+            omp_unset_lock(&queue_lock);
 
-            // Push the current state back with the next number for backtracking
-            stack.push({current.row, current.col, current.num + 1});
+            Sudoku* board = current.board;
+            int row = current.row; 
+            int col = current.col;
+            for(int num = 1; num <= board->size; ++num){
+                if (is_valid(board, row, col, num)) {
+                    board->grid[row][col] = num;
 
-            // Push the next empty cell with number 1
-            stack.push({row, col, 1});
-        } else if (current.num <= result->size) {
-            // If not valid, try the next number for the current cell
-            stack.push({current.row, current.col, current.num + 1});
-        } else {
-            // Backtrack if all numbers have been tried
-            result->grid[current.row][current.col] = 0;
+                    int next_row, next_col;
+                    if (!find_empty(board, next_row, next_col)){
+                        if(!solved){
+                            solved = true;
+                            copy_result(board);
+                        }
+                        cleanup(board);
+                        break;
+                    } 
+
+                    Sudoku* new_board = new Sudoku(*board);
+                    new_board->grid[next_row][next_col] = num;
+                    omp_set_lock(&queue_lock);
+                    board_queue.push_back({new_board, next_row, next_col});
+                    omp_unset_lock(&queue_lock);
+                }
+            }
+            cleanup(board);
         }
     }
 }
 
-bool ParallelBacktrackingMultiBlocksSolver::is_valid(int row, int col, int num) const {
-    // Check row and column for conflicts
-    for (int i = 0; i < result->size; ++i) {
-        if (result->grid[row][i] == num || result->grid[i][col] == num) {
+bool ParallelBacktrackingMultiBlocksSolver::is_valid(const Sudoku* local_result, int row, int col, int num) {
+    for (int i = 0; i < local_result->size; ++i) {
+        if (local_result->grid[row][i] == num || local_result->grid[i][col] == num) {
             return false;
         }
     }
-    int grid_length = sqrt(result->size);
-    int startRow = (row / grid_length) * grid_length;
-    int startCol = (col / grid_length) * grid_length;
-    
+
+    int grid_length = std::sqrt(local_result->size);
+    int start_row = (row / grid_length) * grid_length;
+    int start_col = (col / grid_length) * grid_length;
+
     for (int i = 0; i < grid_length; ++i) {
         for (int j = 0; j < grid_length; ++j) {
-            if (result->grid[startRow + i][startCol + j] == num) {
+            if (local_result->grid[start_row + i][start_col + j] == num) {
                 return false;
             }
         }
@@ -81,10 +131,12 @@ bool ParallelBacktrackingMultiBlocksSolver::is_valid(int row, int col, int num) 
     return true;
 }
 
-bool ParallelBacktrackingMultiBlocksSolver::find_empty(int &row, int &col) const {
-    for (row = 0; row < result->size; ++row) {
-        for (col = 0; col < result->size; ++col) {
-            if (result->grid[row][col] == 0) {
+
+
+bool ParallelBacktrackingMultiBlocksSolver::find_empty(const Sudoku* local_result, int &row, int &col) const {
+    for (row = 0; row < local_result->size; ++row) {
+        for (col = 0; col < local_result->size; ++col) {
+            if (local_result->grid[row][col] == 0) {
                 return true;
             }
         }

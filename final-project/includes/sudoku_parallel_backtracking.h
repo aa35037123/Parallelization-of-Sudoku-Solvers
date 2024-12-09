@@ -30,7 +30,7 @@ public:
     void display() const;
 
 private:
-    std::vector<SerialBacktrackingSolverForParallel> solvers;
+    std::vector<SerialBacktrackingSolverForParallel*> solvers;
     bool find_empty(int &row, int &col, const Sudoku* local_result) const;
     bool backtracking(Sudoku* local_result);
     void copy_result(const Sudoku* local_result);
