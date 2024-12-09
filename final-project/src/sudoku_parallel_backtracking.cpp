@@ -100,7 +100,7 @@ void ParallelBacktrackingSolver::solve() {
     // }
 
     int idx = -1;
-    #pragma omp parallel for reduction(+:idx)
+    #pragma omp parallel for
     for (int num = 0; num < solvers.size(); ++num) {
         if (idx == -1) {
             bool found = solvers[num]->solve2();
@@ -112,7 +112,7 @@ void ParallelBacktrackingSolver::solve() {
 
     if (idx != -1) {
         copy_result(solvers[idx]->result);
-        std::cout << "Solved by solver " << idx << std::endl;
+        // std::cout << "Solved by solver " << idx << std::endl;
     }
 }
 
