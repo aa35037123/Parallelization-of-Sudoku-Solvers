@@ -13,10 +13,12 @@ TARGETS = sudoku_main
 DEPENDENCIES = \
 	./src/sudoku.cpp \
 	./src/sudoku_serial_bruteforce.cpp \
+	./src/sudoku_parallel_bruteforce_omp.cpp \
 	./src/sudoku_serial_backtracking.cpp \
 	./src/sudoku_parallel_backtracking.cpp \
 	./src/sudoku_parallel_backtracking_multiblocks.cpp \
 	./src/sudoku_serial_genetic.cpp \
+	
 
 
 all: $(TARGETS)

@@ -10,6 +10,8 @@ public:
     SerialBacktrackingSolver(const Sudoku& sudoku) {
         init(sudoku);
     }
+     ~SerialBacktrackingSolver() override = default;
+    
 
     void init(const Sudoku& sudoku) override;
 

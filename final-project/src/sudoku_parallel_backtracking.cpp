@@ -91,7 +91,6 @@ std::vector<Sudoku*> ParallelBacktrackingSolver::generate_initial_choices(const 
 }
 
 void ParallelBacktrackingSolver::solve() {
-    int row, col;
     
     // Find the first empty cell
     // if (!find_empty(row, col)) {

@@ -1,24 +1,12 @@
 #include <iostream>
 #include <cmath>
-#include <queue>
-#include <utility>
-#include <memory>
 #include <vector>
 #include "sudoku_serial_bruteforce.h"
 using namespace std;
 
-extern Sudoku* result;
-
 void SerialBruteForceSolver::init(const Sudoku& sudoku) {
     result = new Sudoku();
-    result->size = sudoku.size;
-    result->grid = new uint8_t*[sudoku.size];
-    for (int i = 0; i < sudoku.size; ++i) {
-        result->grid[i] = new uint8_t[sudoku.size];
-        for (int j = 0; j < sudoku.size; ++j) {
-            result->grid[i][j] = sudoku.grid[i][j];
-        }
-    }
+    result->copyFrom(sudoku);
 }
 
 void SerialBruteForceSolver::solve() {
@@ -59,7 +47,6 @@ void SerialBruteForceSolver::solve() {
         row = empty_cells[current.size() - 1].first;
         col = empty_cells[current.size() - 1].second;
         if (!find_empty(row, col, *blank_sudoku)) {  // auto find the new empty row, col
-            //blank_sudoku->print();
             is_solved = true;
             break;
         } 
@@ -73,7 +60,7 @@ void SerialBruteForceSolver::solve() {
             }
         }
         //blank_sudoku->print();
-        for (int i = 0; i < current.size(); i++)
+        for (auto i = 0; i < empty_cells.size(); i++)
             blank_sudoku->grid[empty_cells[i].first][empty_cells[i].second] = 0;
     }
     // if sudoku is solved, then free all sudoku elements in queue
