@@ -20,7 +20,8 @@ COMMON_DEPENDENCIES = \
 	./src/sudoku_parallel_bruteforce_omp.cpp \
 	./src/sudoku_parallel_bruteforce_pthread.cpp \
 	./src/serial_bruteforce_solver_for_parallel.cpp \
-	./src/serial_backtracking_solver_for_parallel.cpp
+	./src/serial_backtracking_solver_for_parallel.cpp \
+	./src/sudoku_parallel_backtracking_multiblocks.cpp
 
 MPI_SOURCES = \
 	./src/sudoku.cpp \
