@@ -59,7 +59,9 @@ int main(int argc, char* argv[]) {
             }
         }
     }
-
+    if(filename.empty() && argc >= 4){
+        filename = argv[1];
+    }
     std::vector<std::string> files;
     if (filename == "medium") {
         for (int i = 1; i <= CASES; i++){

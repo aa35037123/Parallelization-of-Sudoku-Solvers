@@ -10,6 +10,7 @@
 #include <cstring>
 #include <mpi.h>
 #include "CycleTimer.h"
+#define CASES 10
 
 void printUsage(const char* programName) {
     std::cerr << "Usage: " << programName << " <path_to_sudoku_file> [--algorithm <number>]\n"
@@ -32,7 +33,7 @@ int main(int argc, char* argv[]) {
     // Only rank 0 processes command line arguments
     std::string filename;
     int algorithmChoice = 8; // default to MPI implementation
-    
+    std::vector<std::string> files;
     if (rank == 0) {
         if (argc < 2) {
             printUsage(argv[0]);
@@ -51,12 +52,29 @@ int main(int argc, char* argv[]) {
                     MPI_Abort(MPI_COMM_WORLD, 1);
                     return 1;
                 }
-            } else {
-                // Assume this is the filename
-                filename = argv[i];
+            }
+            else if (strcmp(argv[i], "--file") == 0) {
+                if (i + 1 < argc) {
+                    filename = argv[++i];
+                } else {
+                    std::cerr << "Error: --file requires a value\n";
+                    printUsage(argv[0]);
+                    return 1;
+                }
             }
         }
+        if(filename.empty() && argc >= 4){
+            filename = argv[1];
+        }
 
+        if (filename == "medium") {
+            for (int i = 1; i <= CASES; i++){
+                files.push_back("mazes/16x16_Medium_" + std::to_string(i) + ".txt");
+            }
+        }
+        else{
+            files.push_back(filename);
+        }
         if (filename.empty()) {
             std::cerr << "Error: No input file specified\n";
             printUsage(argv[0]);
@@ -70,26 +88,33 @@ int main(int argc, char* argv[]) {
 
     // Load the Sudoku puzzle on rank 0 and broadcast it
     Sudoku sudoku;
-    if (rank == 0) {
-        sudoku.loadSudoku(filename);
-    }
+    // if (rank == 0) {
+    //     // sudoku.loadSudoku(filename);
+    // }
     // You'll need to implement MPI broadcasting of the sudoku grid
-    MPI_Bcast(&sudoku.size, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    if (rank != 0) {
-        sudoku.grid = new uint8_t*[sudoku.size];
-        for (int i = 0; i < sudoku.size; i++) {
-            sudoku.grid[i] = new uint8_t[sudoku.size];
-        }
-    }
-    for (int i = 0; i < sudoku.size; i++) {
-        MPI_Bcast(sudoku.grid[i], sudoku.size, MPI_UINT8_T, 0, MPI_COMM_WORLD);
-    }
+    // MPI_Bcast(&sudoku.size, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    // if (rank != 0) {
+    //     sudoku.grid = new uint8_t*[sudoku.size];
+    //     for (int i = 0; i < sudoku.size; i++) {
+    //         sudoku.grid[i] = new uint8_t[sudoku.size];
+    //     }
+    // }
+    // for (int i = 0; i < sudoku.size; i++) {
+    //     MPI_Bcast(sudoku.grid[i], sudoku.size, MPI_UINT8_T, 0, MPI_COMM_WORLD);
+    // }
 
     std::unique_ptr<SudokuSolver> solver;
     std::string algorithmName;
 
     double startTime = CycleTimer::currentSeconds();
-
+    std::vector<double> times;
+    for (auto file : files){
+        // Load the Sudoku puzzle
+        double start = CycleTimer::currentSeconds();
+        Sudoku sudoku;
+        sudoku.loadSudoku(file);
+        std::unique_ptr<SudokuSolver> solver;
+        
     // Create the appropriate solver based on the algorithm choice
     switch (algorithmChoice) {
         case 1: // Serial backtracking
@@ -119,17 +144,26 @@ int main(int argc, char* argv[]) {
 
     solver->solve();
 
+    double end = CycleTimer::currentSeconds();
+        if(rank == 0){
+            times.push_back((end - start) * 1000);
+            if (!solver->result->isValid()) {
+                std::cerr << "Error: Invalid solution on " << file <<"\n";
+                return 1;
+            }
+        }
+    }
     double endTime = CycleTimer::currentSeconds();
-
     // Only rank 0 prints results
     if (rank == 0) {
-        std::cout << "Time: " << (endTime - startTime) * 1000 << " ms\n";
+        for (size_t i = 0; i < times.size(); i++){
+            std::cout << "Time for " << files[i] << ": " << times[i] << " ms\n";
+        }
+        std::cout << "Total Time: " << (endTime - startTime) * 1000 << " ms\n";
+        
+        // Print results
         std::cout << "Using algorithm: " << algorithmName << "\n";
         std::cout << "Sudoku puzzle loaded from: " << filename << "\n";
-        solver->result->print();
-
-        bool valid = solver->result->isValid();
-        std::cout << "Sudoku is " << (valid ? "valid." : "invalid.") << std::endl;
     }
 
     // Cleanup and finalize MPI
