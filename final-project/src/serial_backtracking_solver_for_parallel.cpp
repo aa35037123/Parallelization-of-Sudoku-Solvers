@@ -14,6 +14,7 @@ bool SerialBacktrackingSolverForParallel::backtracking() {
     // Find the next empty cell
     if (!find_empty(row, col)) {
         *solved = true;
+        this_solver = true;
         return true;  // No empty cells left, puzzle is solved
     }
 
