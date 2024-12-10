@@ -12,7 +12,6 @@ class SerialBacktrackingSolverForParallel: public SerialBacktrackingSolver{
         bool backtracking();
         SerialBacktrackingSolverForParallel(Sudoku sudoku): SerialBacktrackingSolver(sudoku) {};
         bool solve2();
-
 };
 
 class ParallelBacktrackingSolver: public SudokuSolver{
@@ -21,7 +20,7 @@ public:
     ParallelBacktrackingSolver(const Sudoku& sudoku){
         init(sudoku);
     }
-
+   
     void init(const Sudoku& sudoku) override;
 
     bool is_valid(int row, int col, int num, const Sudoku* local_result) const;
@@ -38,7 +37,5 @@ private:
     void cleanup(Sudoku* local_result);
     std::vector<Sudoku*> generate_initial_choices(const Sudoku* local_result);
 };
-
-
 
 #endif

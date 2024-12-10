@@ -4,6 +4,7 @@
 #include "sudoku_serial_genetic.h"
 #include "sudoku_parallel_backtracking.h"
 #include "sudoku_parallel_backtracking_multiblocks.h"
+#include "sudoku_parallel_bruteforce.h"
 #include <iostream>
 #include <memory>
 #include <string>
@@ -17,7 +18,9 @@ void printUsage(const char* programName) {
               << "  2  - Serial implementation using brute force\n"
               << "  3  - Serial implementation using genetic algorithm\n"
               << "  4  - Parallel implementation using backtracking algorithm\n"
-              << "  5  - Parallel implementation using backtracking - multiblocks algorithm\n";
+              << "  5  - Parallel implementation using backtracking - multiblocks algorithm\n"
+              << "  6  - Parallel OMP implementation using brute force algorithm\n"
+              << "  7 - Parallel Pthread implementation using brute force algorithm\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -80,6 +83,18 @@ int main(int argc, char* argv[]) {
         case 5:
             solver = std::make_unique<ParallelBacktrackingMultiBlocksSolver>(sudoku);
             break;
+        case 6:
+            solver = std::make_unique<OMPParallelBruteForceSolver>(sudoku);
+            algorithmName = "Parallel OMP bruteforce (BFS)";
+            break;
+        case 7:
+            solver = std::make_unique<PthreadParallelBruteForceSolver>(sudoku);
+            algorithmName = "Parallel Pthread bruteforce (BFS)";
+            break;
+        // case 8:
+        //     solver = std::make_unique<MPIParallelBruteForceSolver>(sudoku);
+        //     algorithmName = "Parallel MPI bruteforce (BFS)";
+        //     break;
         default:
             std::cerr << "Error: Unknown algorithm number '" << algorithmChoice << "'\n";
             algorithmName = "Unknown";

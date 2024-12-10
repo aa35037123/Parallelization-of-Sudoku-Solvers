@@ -1,85 +1,127 @@
+#include "sudoku.h"
 #include <iostream>
 #include <fstream>
-#include <cstdint>
 #include <unordered_set>
 #include <cmath>
-#include <stdio.h>
-#include <string.h>
+#include <cstring>
 #include <vector>
 #include <algorithm>
 #include <ctime>
-#include "sudoku.h"
-
-
-Sudoku::Sudoku() : size(0) {
-    grid = nullptr;
-}
-
-Sudoku::Sudoku(int size) : size(size) {
-    allocateGrid();
-}
-
-Sudoku::Sudoku(int size, uint8_t** grid) : size(size) {
-
-    allocateGrid();
-    for (int i = 0; i < size; ++i) {
-        memcpy(this->grid[i], grid[i], size * sizeof(uint8_t));
-    }
-
-}
+#include <random>
 
 void Sudoku::allocateGrid() {
     grid = new uint8_t*[size];
     for (int i = 0; i < size; ++i) {
-        grid[i] = new uint8_t[size];
+        grid[i] = new uint8_t[size]();
     }
 }
 
-Sudoku::~Sudoku() {
-    for (int i = 0; i < size; ++i) {
-        delete[] grid[i];
+void Sudoku::deallocateGrid() {
+    if (grid) {
+        for (int i = 0; i < size; ++i) {
+            delete[] grid[i];
+        }
+        delete[] grid;
+        grid = nullptr;
     }
-    //delete[] grid;
+}
+
+Sudoku::Sudoku() : size(0), grid(nullptr) {}
+
+Sudoku::Sudoku(int size) : size(size), grid(nullptr) {
+    if (size > 0) allocateGrid();
+}
+
+Sudoku::Sudoku(int size, uint8_t** grid) : size(size), grid(nullptr) {
+    if (size > 0) {
+        allocateGrid();
+        for (int i = 0; i < size; ++i) {
+            std::copy(grid[i], grid[i] + size, this->grid[i]);
+        }
+    }
+}
+
+Sudoku::Sudoku(const Sudoku& other) : size(other.size), grid(nullptr) {
+    if (size > 0) {
+        allocateGrid();
+        for (int i = 0; i < size; ++i) {
+            std::copy(other.grid[i], other.grid[i] + size, grid[i]);
+        }
+    }
+}
+
+Sudoku::Sudoku(Sudoku&& other) noexcept : size(other.size), grid(other.grid) {
+    other.size = 0;
+    other.grid = nullptr;
+}
+
+Sudoku::~Sudoku() {
+    deallocateGrid();
+}
+
+Sudoku& Sudoku::operator=(const Sudoku& other) {
+    if (this != &other) {
+        deallocateGrid();
+        size = other.size;
+        if (size > 0) {
+            allocateGrid();
+            for (int i = 0; i < size; ++i) {
+                std::copy(other.grid[i], other.grid[i] + size, grid[i]);
+            }
+        }
+    }
+    return *this;
+}
+
+Sudoku& Sudoku::operator=(Sudoku&& other) noexcept {
+    if (this != &other) {
+        deallocateGrid();
+        size = other.size;
+        grid = other.grid;
+        other.size = 0;
+        other.grid = nullptr;
+    }
+    return *this;
+}
+
+void Sudoku::copyFrom(const Sudoku& other) {
+    *this = other;
 }
 
 void Sudoku::loadSudoku(const std::string& filename) {
     std::ifstream file(filename);
-
     int gridSize;
-
+    
     if (!file || !(file >> gridSize) || gridSize <= 0) {
         std::cerr << "Invalid file or grid size." << std::endl;
         return;
     }
 
-    if (size != gridSize){
+    if (size != gridSize) {
+        deallocateGrid();
         size = gridSize;
         allocateGrid();
     }
 
-    // Read each cell value into the 2D array
-    for (int row = 0; row < gridSize; ++row) {
-        for (int col = 0; col < gridSize; ++col) {
+    for (int row = 0; row < size; ++row) {
+        for (int col = 0; col < size; ++col) {
             int value;
             file >> value;
             grid[row][col] = static_cast<uint8_t>(value);
         }
     }
-    file.close();
 }
 
 void Sudoku::print() const {
     for (int row = 0; row < size; ++row) {
         for (int col = 0; col < size; ++col) {
-            printf("%3d", static_cast<int>(grid[row][col]));
+            std::printf("%3d", static_cast<int>(grid[row][col]));
         }
-        printf("\n");
+        std::printf("\n");
     }
 }
 
-
 bool Sudoku::isValid() const {
-    // Check each row
     for (int row = 0; row < size; ++row) {
         std::unordered_set<int> rowSet;
         for (int col = 0; col < size; ++col) {
@@ -90,7 +132,6 @@ bool Sudoku::isValid() const {
         }
     }
 
-    // Check each column
     for (int col = 0; col < size; ++col) {
         std::unordered_set<int> colSet;
         for (int row = 0; row < size; ++row) {
@@ -101,7 +142,6 @@ bool Sudoku::isValid() const {
         }
     }
 
-    // Check each sub-grid
     int subGridSize = static_cast<int>(std::sqrt(size));
     for (int boxRow = 0; boxRow < size; boxRow += subGridSize) {
         for (int boxCol = 0; boxCol < size; boxCol += subGridSize) {
@@ -116,22 +156,7 @@ bool Sudoku::isValid() const {
             }
         }
     }
-
     return true;
-}
-
-void Sudoku::copyFrom(const Sudoku& other) {
-    if (grid == nullptr) {
-        size = other.size;
-        allocateGrid();
-    } 
-    else if (size != other.size){
-        std::cerr << "Grid sizes do not match when copying.\n";
-        return;
-    }
-    for (int i = 0; i < size; ++i) {
-        memcpy(grid[i], other.grid[i], size * sizeof(uint8_t));
-    }
 }
 
 void Sudoku::random_empty_cells(int empty_cells) {
@@ -141,8 +166,12 @@ void Sudoku::random_empty_cells(int empty_cells) {
             empty_indices.push_back(i * size + j);
         }
     }
-    std::srand(std::time(0));
-    std::random_shuffle(empty_indices.begin(), empty_indices.end());
+    std::srand(std::time(nullptr));
+    
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(empty_indices.begin(), empty_indices.end(), g);
+    
     for (int i = 0; i < empty_cells; ++i) {
         int row = empty_indices[i] / size;
         int col = empty_indices[i] % size;
