@@ -125,7 +125,7 @@ int main(int argc, char* argv[]) {
 
         solver->solve();
         if (!solver->result->isValid()) {
-            std::cerr << "Error: Invalid solution\n";
+            std::cerr << "Error: Invalid solution on " << file <<"\n";
             return 1;
         }
     }
