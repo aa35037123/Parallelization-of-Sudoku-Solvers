@@ -50,7 +50,7 @@ private:
     bool is_valid(int row, int col, int num, const Sudoku* sudoku) const;
     void copy_result(const Sudoku& sudoku);
     bool find_empty(int &row, int &col, const Sudoku* local_result) const;
-    std::vector<Sudoku*> init_unsolved_boards(const Sudoku* local_result);
+    std::vector<Sudoku*> init_unsolved_boards(int current_strap, const Sudoku* local_result);
     
 private:
     int bootstrap = 4;

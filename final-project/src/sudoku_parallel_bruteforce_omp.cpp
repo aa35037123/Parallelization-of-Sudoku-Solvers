@@ -88,7 +88,7 @@ void OMPParallelBruteForceSolver::init(const Sudoku& sudoku) {
     
     result = new Sudoku(sudoku);
 
-    std::vector<Sudoku*> initial_choices = init_unsolved_boards(result);
+    std::vector<Sudoku*> initial_choices = init_unsolved_boards(0, result);
     //unsolvedBoards.reserve(initial_choices.size());
     for (Sudoku* choice : initial_choices) {
         SerialBruteforceSolverForParallel* sbf = new SerialBruteforceSolverForParallel(*choice);
@@ -97,8 +97,13 @@ void OMPParallelBruteForceSolver::init(const Sudoku& sudoku) {
     }    
 }
 
-std::vector<Sudoku*> OMPParallelBruteForceSolver::init_unsolved_boards(const Sudoku* local_result) {
+std::vector<Sudoku*> OMPParallelBruteForceSolver::init_unsolved_boards(int current_strap, const Sudoku* local_result) {
     std::vector<Sudoku*> initial_choices;
+    if (current_strap == bootstrap) {
+        initial_choices.push_back(new Sudoku(*local_result));
+        return initial_choices;
+    }
+
     int row = 0;
     int col = 0;
     if (!find_empty(row, col, local_result)) {
@@ -116,7 +121,13 @@ std::vector<Sudoku*> OMPParallelBruteForceSolver::init_unsolved_boards(const Sud
                          choice->grid[i]);
             }
             choice->grid[row][col] = num;
-            initial_choices.push_back(choice);
+            
+            std::vector<Sudoku*> next_choices = init_unsolved_boards(current_strap + 1, choice);
+            if (next_choices.empty())
+                continue;
+            for (Sudoku* next_choice : next_choices) {
+                initial_choices.push_back(next_choice);
+            }
         }
     }
     return initial_choices;
