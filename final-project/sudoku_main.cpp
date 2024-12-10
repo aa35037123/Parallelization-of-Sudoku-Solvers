@@ -5,9 +5,9 @@
 
 #include "sudoku_parallel_backtracking.h"
 // #include "sudoku_parallel_backtracking_multiblocks.h"
-#include "sudoku_parallel_backtracking_mpi.h"
+// #include "sudoku_parallel_backtracking_mpi.h"
 #include "sudoku_parallel_bruteforce.h"
-#include "sudoku_parallel_bruteforce_mpi.h"
+// #include "sudoku_parallel_bruteforce_mpi.h"
 #include <iostream>
 #include <memory>
 #include <string>
@@ -135,7 +135,7 @@ int main(int argc, char* argv[]) {
         
     }
     double endTime = CycleTimer::currentSeconds();
-    for (int i = 0; i < times.size(); i++){
+    for (size_t i = 0; i < times.size(); i++){
         std::cout << "Time for " << files[i] << ": " << times[i] << " ms\n";
     }
     std::cout << "Total Time: " << (endTime - startTime) * 1000 << " ms\n";
