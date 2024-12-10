@@ -3,8 +3,13 @@
 #include "sudoku_serial_bruteforce.h"
 #include "sudoku_serial_genetic.h"
 #include "sudoku_parallel_backtracking.h"
-#include "sudoku_parallel_backtracking_multiblocks.h"
-#include "sudoku_parallel_bruteforce.h"
+// #include "sudoku_parallel_backtracking_multiblocks.h"
+#include "sudoku_parallel_bruteforce_omp.h"
+#include "sudoku_parallel_bruteforce_pthread.h"
+#include "sudoku_parallel_backtracking_omp.h"
+#include "sudoku_parallel_backtracking_pthread.h"
+#include "sudoku_parallel_bruteforce_mpi.h"
+#include "sudoku_parallel_backtracking_mpi.h"
 #include <iostream>
 #include <memory>
 #include <string>
