@@ -22,6 +22,7 @@ bool SerialBacktrackingSolverForParallel::backtracking() {
     // Find the next empty cell
     if (!find_empty(row, col)) {
         *solved = true;
+        this_solver = true;
         return true;  // No empty cells left, puzzle is solved
     }
 
@@ -102,15 +103,22 @@ void ParallelBacktrackingSolver::solve() {
     for (size_t num = 0; num < solvers.size(); ++num) {
         if (idx == -1) {
             bool found = solvers[num]->solve2();
+            #pragma omp critical
             if (found) {
                 idx = num;
             }
         }
     }
 
-    if (idx != -1) {
-        copy_result(solvers[idx]->result);
-        // std::cout << "Solved by solver " << idx << std::endl;
+    // if (idx != -1) {
+    //     copy_result(solvers[idx]->result);
+    //     // std::cout << "Solved by solver " << idx << std::endl;
+    // }
+    for (size_t i = 0; i < solvers.size(); ++i) {
+        if (solvers[i]->this_solver) {
+            copy_result(solvers[i]->result);
+            break;
+        }
     }
 }
 

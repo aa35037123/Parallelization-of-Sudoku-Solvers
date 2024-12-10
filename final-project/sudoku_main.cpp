@@ -128,6 +128,7 @@ int main(int argc, char* argv[]) {
             std::cerr << "Error: Invalid solution on " << file <<"\n";
             return 1;
         }
+        
     }
     double endTime = CycleTimer::currentSeconds();
     std::cout << "Time: " << (endTime - startTime) * 1000 << " ms\n";

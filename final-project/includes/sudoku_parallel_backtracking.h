@@ -8,9 +8,10 @@
 
 class SerialBacktrackingSolverForParallel: public SerialBacktrackingSolver{
     public:
+        bool this_solver;
         bool* solved;
         bool backtracking();
-        SerialBacktrackingSolverForParallel(Sudoku sudoku): SerialBacktrackingSolver(sudoku) {};
+        SerialBacktrackingSolverForParallel(Sudoku sudoku): SerialBacktrackingSolver(sudoku) {this_solver = false;};
         bool solve2();
 };
 
