@@ -13,7 +13,7 @@
 #define CASES 10
 
 void printUsage(const char* programName) {
-    std::cerr << "Usage: " << programName << " <path_to_sudoku_file> [--algorithm <number>]\n"
+    std::cerr << "Usage: " << programName << " --file <path_to_sudoku_file> [--algorithm <number>]\n"
               << "Available algorithms:\n"
               << "  1  - Serial implementation using backtracking\n"
               << "  2  - Serial implementation using brute force\n"
@@ -62,9 +62,6 @@ int main(int argc, char* argv[]) {
                     return 1;
                 }
             }
-        }
-        if(filename.empty() && argc >= 4){
-            filename = argv[1];
         }
 
         if (filename == "medium") {
