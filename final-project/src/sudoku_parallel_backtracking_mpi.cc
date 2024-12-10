@@ -17,7 +17,7 @@ MPIBacktrackingSolver::MPIBacktrackingSolver(const Sudoku& sudoku) : MPIBacktrac
 }
 
 MPIBacktrackingSolver::~MPIBacktrackingSolver() {
-    for (auto board : local_boards) {
+    for (Sudoku* board : local_boards) {
         delete board;
     }
 }
@@ -33,7 +33,7 @@ void MPIBacktrackingSolver::init(const Sudoku& sudoku) {
         std::vector<Sudoku*> initial_boards = generate_initial_boards();
         distribute_work(initial_boards);
 
-        for (auto board : initial_boards) {
+        for (Sudoku* board : initial_boards) {
             delete board;
         }
     } else {
@@ -47,9 +47,8 @@ void MPIBacktrackingSolver::solve() {
     Sudoku* local_solution = nullptr;
 
     // Try to solve each local board
-    for (auto board : local_boards) {
+    for (Sudoku* board : local_boards) {
         SerialBacktrackingSolverForParallel* solver = new SerialBacktrackingSolverForParallel(*board);
-        solver->solved = new bool(false);
         if (solver->solve2()) {
             local_solution_found = true;
             local_solution = new Sudoku(*(solver->result));

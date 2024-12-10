@@ -18,9 +18,9 @@ void printUsage(const char* programName) {
               << "Available algorithms:\n"
               << "  1  - Serial implementation using backtracking\n"
               << "  2  - Serial implementation using brute force\n"
-              << "  3  - Serial implementation using genetic algorithm\n"
+              << "  3  - Serial implementation using genetic algorithm (deprecated)\n"
               << "  4  - Parallel implementation using backtracking algorithm\n"
-              << "  5  - Parallel implementation using backtracking - multiblocks algorithm\n"
+              << "  5  - Parallel Pthread implementation using backtracking algorithm\n"
               << "  6  - Parallel OMP implementation using brute force algorithm\n"
               << "  7 - Parallel Pthread implementation using brute force algorithm\n";
 }
@@ -85,45 +85,41 @@ int main(int argc, char* argv[]) {
         std::unique_ptr<SudokuSolver> solver;
         
 
-        // Create the appropriate solver based on the algorithm choice
-        switch (algorithmChoice) {
-            case 1: // Serial backtracking
-                solver = std::make_unique<SerialBacktrackingSolver>(sudoku);
-                algorithmName = "Serial backtracking (DFS)";
-                break;
-            case 2: // Serial brute force
-                solver = std::make_unique<SerialBruteForceSolver>(sudoku);
-                algorithmName = "Serial bruteforce (BFS)";
-                break;
-            case 3: // Serial genetic algorithm
-                // solver = std::make_unique<SerialGeneticSolver>(sudoku);
-                break;
-            case 4:
-                solver = std::make_unique<ParallelBacktrackingSolver>(sudoku);
-                algorithmName = "Parallel backtracking (DFS)";
-                break;
-            case 5:
-                solver = std::make_unique<ParallelBacktrackingMultiBlocksSolver>(sudoku);
-                algorithmName = "Parallel backtracking multiblocks (DFS)";
-                break;
-            case 6:
-                solver = std::make_unique<OMPParallelBruteForceSolver>(sudoku);
-                algorithmName = "Parallel OMP bruteforce (BFS)";
-                break;
-            case 7:
-                solver = std::make_unique<PthreadParallelBruteForceSolver>(sudoku);
-                algorithmName = "Parallel Pthread bruteforce (BFS)";
-                break;
-            // case 8:
-            //     solver = std::make_unique<MPIParallelBruteForceSolver>(sudoku);
-            //     algorithmName = "Parallel MPI bruteforce (BFS)";
-            //     break;
-            default:
-                std::cerr << "Error: Unknown algorithm number '" << algorithmChoice << "'\n";
-                algorithmName = "Unknown";
-                printUsage(argv[0]);
-                return 1;
-        }
+    // Create the appropriate solver based on the algorithm choice
+    switch (algorithmChoice) {
+        case 1: // Serial backtracking
+            solver = std::make_unique<SerialBacktrackingSolver>(sudoku);
+            algorithmName = "Serial backtracking (DFS)";
+            break;
+        case 2: // Serial brute force
+            solver = std::make_unique<SerialBruteForceSolver>(sudoku);
+            algorithmName = "Serial bruteforce (BFS)";
+            break;
+        case 3: // Serial genetic algorithm
+            // solver = std::make_unique<SerialGeneticSolver>(sudoku);
+            break;
+        case 4:
+            solver = std::make_unique<OMPParallelBacktrackingSolver>(sudoku);
+            algorithmName = "Parallel OMP backtracking (DFS)";
+            break;
+        case 5:
+            solver = std::make_unique<PthreadParallelBacktrackingSolver>(sudoku);
+            algorithmName = "Parallel Pthread backtracking (DFS)";
+            break;
+        case 6:
+            solver = std::make_unique<OMPParallelBruteForceSolver>(sudoku);
+            algorithmName = "Parallel OMP bruteforce (BFS)";
+            break;
+        case 7:
+            solver = std::make_unique<PthreadParallelBruteForceSolver>(sudoku);
+            algorithmName = "Parallel Pthread bruteforce (BFS)";
+            break;
+        default:
+            std::cerr << "Error: Unknown algorithm number '" << algorithmChoice << "'\n";
+            algorithmName = "Unknown";
+            printUsage(argv[0]);
+            return 1;
+    }
 
         solver->solve();
 
