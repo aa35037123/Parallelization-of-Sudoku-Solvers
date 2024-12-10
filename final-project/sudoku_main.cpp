@@ -76,8 +76,10 @@ int main(int argc, char* argv[]) {
     std::string algorithmName;
 
     double startTime = CycleTimer::currentSeconds();
+    vector<double> times;
     for (auto file : files){
         // Load the Sudoku puzzle
+        double start = CycleTimer::currentSeconds();
         Sudoku sudoku;
         sudoku.loadSudoku(file);
         std::unique_ptr<SudokuSolver> solver;
@@ -124,6 +126,9 @@ int main(int argc, char* argv[]) {
         }
 
         solver->solve();
+
+        double end = CycleTimer::currentSeconds();
+        times.push_back((end - start) * 1000);
         if (!solver->result->isValid()) {
             std::cerr << "Error: Invalid solution on " << file <<"\n";
             return 1;
@@ -131,7 +136,10 @@ int main(int argc, char* argv[]) {
         
     }
     double endTime = CycleTimer::currentSeconds();
-    std::cout << "Time: " << (endTime - startTime) * 1000 << " ms\n";
+    for (int i = 0; i < times.size(); i++){
+        std::cout << "Time for " << files[i] << ": " << times[i] << " ms\n";
+    }
+    std::cout << "Total Time: " << (endTime - startTime) * 1000 << " ms\n";
     
     // Print results
     std::cout << "Using algorithm: " << algorithmName << "\n";
