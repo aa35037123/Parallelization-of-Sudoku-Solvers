@@ -15,6 +15,8 @@ void PthreadParallelBacktrackingSolver::init(const Sudoku& sudoku) {
     std::vector<Sudoku*> initial_choices = init_unsolved_boards(0, result);
     for (Sudoku* choice : initial_choices) {
         SerialBacktrackingSolverForParallel* sbf = new SerialBacktrackingSolverForParallel(*choice);
+        sbf->solved = new bool(false);
+        sbf->this_solver = false;
         unsolvedBoards.push_back(sbf);
         delete choice;
     }
