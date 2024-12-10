@@ -9,6 +9,7 @@
 #include <memory>
 #include <string>
 #include <cstring>
+#include <vector>
 #include "CycleTimer.h"
 
 void printUsage(const char* programName) {
@@ -55,7 +56,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    vector<string> files;
+    std::vector<string> files;
     if (filename == "medium") {
         for (int i = 1; i <= 100; i++){
             files.push_back("mazes/16x16_medium_" + to_string(i) + ".txt");
