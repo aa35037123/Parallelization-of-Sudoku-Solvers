@@ -135,7 +135,7 @@ std::vector<Sudoku*> OMPParallelBruteForceSolver::init_unsolved_boards(int curre
 
 void OMPParallelBruteForceSolver::solve() {
     int idx = -1;
-    std::cout << unsolvedBoards.size() << std::endl;
+    //std::cout << unsolvedBoards.size() << std::endl;
 
     #pragma omp parallel for shared(idx)
     for (int num = 0; num < unsolvedBoards.size(); ++num) {
