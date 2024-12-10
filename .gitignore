@@ -33,6 +33,6 @@
 
 
 .vscode/
-./final-project/sudoku_main
 
 final-project/sudoku_main
+final-project/sudoku_mpi_main
