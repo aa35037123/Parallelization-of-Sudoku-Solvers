@@ -24,6 +24,9 @@ void PthreadParallelBacktrackingSolver::init(const Sudoku& sudoku) {
 
 void* PthreadParallelBacktrackingSolver::solve_thread(void* arg) {
     BacktrackingThreadData* data = static_cast<BacktrackingThreadData*>(arg);
+    if (*(data->solver->solved)) {
+        return nullptr;
+    }
     bool found = data->solver->solve2();
     
     if (found) {
