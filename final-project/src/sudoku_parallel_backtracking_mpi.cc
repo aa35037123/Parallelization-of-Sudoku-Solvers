@@ -49,6 +49,8 @@ void MPIBacktrackingSolver::solve() {
     // Try to solve each local board
     for (Sudoku* board : local_boards) {
         SerialBacktrackingSolverForParallel* solver = new SerialBacktrackingSolverForParallel(*board);
+        solver->solved = &local_solution_found;
+        solver->this_solver = false;
         if (solver->solve2()) {
             local_solution_found = true;
             local_solution = new Sudoku(*(solver->result));
