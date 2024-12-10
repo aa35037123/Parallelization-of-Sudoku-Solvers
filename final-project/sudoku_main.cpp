@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
         } 
         else if (strcmp(argv[i], "--file") == 0) {
             if (i + 1 < argc) {
-                filename = std::atoi(argv[++i]);
+                filename = argv[++i];
             } else {
                 std::cerr << "Error: --file requires a value\n";
                 printUsage(argv[0]);
@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
     std::vector<string> files;
     if (filename == "medium") {
         for (int i = 1; i <= 100; i++){
-            files.push_back("mazes/16x16_medium_" + to_string(i) + ".txt");
+            files.push_back("mazes/16x16_medium_" + std::atoi(i) + ".txt");
         }
     }
     else{
