@@ -19,14 +19,17 @@ COMMON_DEPENDENCIES = \
 	./src/sudoku_parallel_backtracking_multiblocks.cpp \
 	./src/sudoku_parallel_bruteforce_omp.cpp \
 	./src/sudoku_parallel_bruteforce_pthread.cpp \
-	./src/serial_bruteforce_solver_for_parallel.cpp
+	./src/serial_bruteforce_solver_for_parallel.cpp \
+	./src/serial_backtracking_solver_for_parallel.cpp
 
 MPI_SOURCES = \
 	./src/sudoku.cpp \
 	./src/sudoku_serial_bruteforce.cpp \
 	./src/sudoku_serial_backtracking.cpp \
 	./src/sudoku_parallel_bruteforce_mpi.cc \
-	./src/serial_bruteforce_solver_for_parallel.cpp
+	./src/sudoku_parallel_backtracking_mpi.cc \
+	./src/serial_bruteforce_solver_for_parallel.cpp \
+	./src/serial_backtracking_solver_for_parallel.cpp
 
 all: $(TARGETS)
 

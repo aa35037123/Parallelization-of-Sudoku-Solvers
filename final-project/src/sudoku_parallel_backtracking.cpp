@@ -6,42 +6,6 @@
 #define NUM_THREADS 4
 
 
-// extern Sudoku* result;
-
-bool SerialBacktrackingSolverForParallel::solve2() {
-    return backtracking();
-}
-
-bool SerialBacktrackingSolverForParallel::backtracking() {
-    if (*solved) {
-        return true;
-    }
-
-    int row, col;
-
-    // Find the next empty cell
-    if (!find_empty(row, col)) {
-        *solved = true;
-        this_solver = true;
-        return true;  // No empty cells left, puzzle is solved
-    }
-
-    for (int num = 1; num <= result->size; ++num) {
-        if (is_valid(row, col, num)) {
-            result->grid[row][col] = num;
-
-            if (backtracking()) {
-                return true;
-            }
-
-            // Backtrack
-            result->grid[row][col] = 0;
-        }
-    }
-    return false;
-}
-
-
 void ParallelBacktrackingSolver::init(const Sudoku& sudoku) {
     omp_set_dynamic(0);
     omp_set_num_threads(NUM_THREADS);
@@ -110,10 +74,7 @@ void ParallelBacktrackingSolver::solve() {
         }
     }
 
-    // if (idx != -1) {
-    //     copy_result(solvers[idx]->result);
-    //     // std::cout << "Solved by solver " << idx << std::endl;
-    // }
+
     for (size_t i = 0; i < solvers.size(); ++i) {
         if (solvers[i]->this_solver) {
             copy_result(solvers[i]->result);
