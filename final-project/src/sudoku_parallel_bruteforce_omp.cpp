@@ -2,7 +2,7 @@
 #include <cmath>
 #include <queue>
 #include <omp.h>
-#include "sudoku_parallel_bruteforce_omp.h"
+#include "sudoku_parallel_bruteforce.h"
 using namespace std;
 #define NUM_THREADS 4
 
