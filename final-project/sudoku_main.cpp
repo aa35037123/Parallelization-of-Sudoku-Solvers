@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
     std::string algorithmName;
 
     double startTime = CycleTimer::currentSeconds();
-    for (file : files){
+    for (auto file : files){
         // Load the Sudoku puzzle
         Sudoku sudoku;
         sudoku.loadSudoku(file);
@@ -122,7 +122,10 @@ int main(int argc, char* argv[]) {
         }
 
         solver->solve();
-
+        if (!solver->result->isValid()) {
+            std::cerr << "Error: Invalid solution\n";
+            return 1;
+        }
     }
     double endTime = CycleTimer::currentSeconds();
     std::cout << "Time: " << (endTime - startTime) * 1000 << " ms\n";
