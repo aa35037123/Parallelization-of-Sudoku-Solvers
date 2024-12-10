@@ -99,7 +99,7 @@ void ParallelBacktrackingSolver::solve() {
 
     int idx = -1;
     #pragma omp parallel for
-    for (int num = 0; num < solvers.size(); ++num) {
+    for (size_t num = 0; num < solvers.size(); ++num) {
         if (idx == -1) {
             bool found = solvers[num]->solve2();
             if (found) {

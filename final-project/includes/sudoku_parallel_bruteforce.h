@@ -89,38 +89,4 @@ private:
     std::vector<SerialBruteforceSolverForParallel*> unsolvedBoards;
     pthread_mutex_t result_mutex = PTHREAD_MUTEX_INITIALIZER;
 };
-
-/////////////// MPI version ///////////////
-
-//#include <mpi.h>
-
-class MPIBruteForceSolver : public SudokuSolver {
-public:
-    MPIBruteForceSolver();
-    MPIBruteForceSolver(const Sudoku& sudoku);
-    ~MPIBruteForceSolver() override;
-
-    void init(const Sudoku& sudoku) override;
-    void solve() override;
-
-private:
-    bool is_valid(int row, int col, int num, const Sudoku* sudoku) const;
-    void copy_result(const Sudoku& sudoku);
-    bool find_empty(int& row, int& col, const Sudoku* local_result) const;
-    std::vector<Sudoku*> init_unsolved_boards(int current_strap, const Sudoku* local_result);
-    void distribute_work(const std::vector<Sudoku*>& initial_boards);
-    void process_local_boards(const std::vector<Sudoku*>& local_boards);
-    void gather_results();
-    
-    static void serialize_sudoku(const Sudoku* sudoku, std::vector<uint8_t>& buffer);
-    static Sudoku* deserialize_sudoku(const std::vector<uint8_t>& buffer);
-
-private:
-    int rank;           // Current process rank
-    int world_size;     // Total number of processes
-    int bootstrap = 4;  // Initial branching depth
-    bool solution_found;
-    std::vector<Sudoku*> local_boards;  // Boards assigned to this process
-};
-
 #endif

@@ -1,190 +1,246 @@
-// #include "sudoku_parallel_bruteforce.h"
-// #include <cmath>
-// #include <algorithm>
+// sudoku_parallel_bruteforce_mpi.cc
 
-// MPIBruteForceSolver::MPIBruteForceSolver() : solution_found(false) {
-//     result = nullptr;
-//     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-//     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-// }
+#include "sudoku_parallel_bruteforce.h"
+#include "sudoku_parallel_bruteforce_mpi.h"
+#include <mpi.h>
+#include <cmath>
 
-// MPIBruteForceSolver::MPIBruteForceSolver(const Sudoku& sudoku) : MPIBruteForceSolver() {
-//     init(sudoku);
-// }
+MPIBruteForceSolver::MPIBruteForceSolver() {
+    result = nullptr;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+}
 
-// MPIBruteForceSolver::~MPIBruteForceSolver() {
-//     for (auto board : local_boards) {
-//         delete board;
-//     }
-// }
+MPIBruteForceSolver::MPIBruteForceSolver(const Sudoku& sudoku) : MPIBruteForceSolver() {
+    init(sudoku);
+}
 
-// void MPIBruteForceSolver::init(const Sudoku& sudoku) {
-//     if (result != nullptr) {
-//         delete result;
-//     }
-//     result = new Sudoku(sudoku);
-//     solution_found = false;
+MPIBruteForceSolver::~MPIBruteForceSolver() {
+    for (auto board : local_boards) {
+        delete board;
+    }
+}
 
-//     if (rank == 0) {
-//         // Root process generates initial boards
-//         std::vector<Sudoku*> initial_boards = init_unsolved_boards(0, result);
-//         distribute_work(initial_boards);
-        
-//         // Cleanup initial boards after distribution
-//         for (auto board : initial_boards) {
-//             delete board;
-//         }
-//     } else {
-//         // Other processes wait to receive their work
-//         distribute_work(std::vector<Sudoku*>());
-//     }
-// }
+void MPIBruteForceSolver::init(const Sudoku& sudoku) {
+        if (result != nullptr) {
+            delete result;
+        }
+        result = new Sudoku(sudoku);
 
-// void MPIBruteForceSolver::solve() {
-//     // Process local boards
-//     process_local_boards(local_boards);
-    
-//     // Gather results from all processes
-//     gather_results();
-// }
+        if (rank == 0) {
+            // Root process generates initial boards
+            std::vector<Sudoku*> initial_boards = generate_initial_boards();
+            distribute_work(initial_boards);
 
-// void MPIBruteForceSolver::process_local_boards(const std::vector<Sudoku*>& boards) {
-//     bool local_solution = false;
-//     Sudoku* solution_board = nullptr;
+            for (auto board : initial_boards) {
+                delete board;
+            }
+        } else {
+            // Worker processes wait for their boards
+            receive_work();
+        }
+    }
 
-//     for (auto board : boards) {
-//         SerialBruteForceSolver solver(*board);
-//         if (solver.solve()) {
-//             local_solution = true;
-//             solution_board = new Sudoku(*solver.get_result());
-//             break;
-//         }
-//     }
+void MPIBruteForceSolver::solve() {
+    bool local_solution_found = false;
+    Sudoku* local_solution = nullptr;
 
-//     // Pack solution status and board
-//     std::vector<uint8_t> buffer;
-//     if (local_solution) {
-//         serialize_sudoku(solution_board, buffer);
-//     }
-    
-//     int buffer_size = buffer.size();
-//     MPI_Bcast(&buffer_size, 1, MPI_INT, rank, MPI_COMM_WORLD);
-    
-//     if (buffer_size > 0) {
-//         buffer.resize(buffer_size);
-//         MPI_Bcast(buffer.data(), buffer_size, MPI_BYTE, rank, MPI_COMM_WORLD);
-//     }
+    // Try to solve each local board
+    for (auto board : local_boards) {
+        SerialBruteforceSolverForParallel* solver = new SerialBruteforceSolverForParallel(*board);
+        if (solver->solve2()) {
+            local_solution_found = true;
+            local_solution = new Sudoku(*(solver->result));
+            break;
+        }
+    }
 
-//     delete solution_board;
-// }
-
-// void MPIBruteForceSolver::distribute_work(const std::vector<Sudoku*>& initial_boards) {
-//     if (rank == 0) {
-//         // Calculate work distribution
-//         int boards_per_process = initial_boards.size() / world_size;
-//         int remaining_boards = initial_boards.size() % world_size;
-        
-//         // Distribute boards to other processes
-//         int current_pos = 0;
-//         for (int i = 0; i < world_size; i++) {
-//             int boards_to_send = boards_per_process + (i < remaining_boards ? 1 : 0);
+    // Gather results
+    if (rank == 0) {
+        if (local_solution_found) {
+            copy_to_result(*local_solution);
+        }
+        std::cout << "World size: " << world_size << std::endl;
+        // Check solutions from other processes
+        for (int i = 1; i < world_size; i++) {
+            int has_solution;
+            MPI_Recv(&has_solution, 1, MPI_INT, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             
-//             if (i == rank) {
-//                 // Keep local boards for root process
-//                 for (int j = 0; j < boards_to_send; j++) {
-//                     local_boards.push_back(new Sudoku(*initial_boards[current_pos + j]));
-//                 }
-//             } else {
-//                 // Send boards to other processes
-//                 for (int j = 0; j < boards_to_send; j++) {
-//                     std::vector<uint8_t> buffer;
-//                     serialize_sudoku(initial_boards[current_pos + j], buffer);
-//                     int buffer_size = buffer.size();
-//                     MPI_Send(&buffer_size, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-//                     MPI_Send(buffer.data(), buffer_size, MPI_BYTE, i, 0, MPI_COMM_WORLD);
-//                 }
-//             }
-//             current_pos += boards_to_send;
-//         }
-//     } else {
-//         // Receive boards from root process
-//         while (true) {
-//             int buffer_size;
-//             MPI_Status status;
-//             MPI_Recv(&buffer_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
-            
-//             if (buffer_size == 0) break;
-            
-//             std::vector<uint8_t> buffer(buffer_size);
-//             MPI_Recv(buffer.data(), buffer_size, MPI_BYTE, 0, 0, MPI_COMM_WORLD, &status);
-            
-//             Sudoku* board = deserialize_sudoku(buffer);
-//             local_boards.push_back(board);
-//         }
-//     }
-// }
-
-// void MPIBruteForceSolver::gather_results() {
-//     if (rank == 0) {
-//         // Root process receives and processes solutions
-//         std::vector<uint8_t> solution_buffer;
-//         MPI_Status status;
-        
-//         for (int i = 1; i < world_size; i++) {
-//             int buffer_size;
-//             MPI_Recv(&buffer_size, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
-            
-//             if (buffer_size > 0) {
-//                 solution_buffer.resize(buffer_size);
-//                 MPI_Recv(solution_buffer.data(), buffer_size, MPI_BYTE, i, 0, MPI_COMM_WORLD, &status);
+            if (has_solution) {
+                std::vector<uint8_t> grid_data(result->size * result->size);
+                MPI_Recv(grid_data.data(), grid_data.size(), MPI_UINT8_T, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 
-//                 Sudoku* solution = deserialize_sudoku(solution_buffer);
-//                 copy_result(*solution);
-//                 delete solution;
-//                 solution_found = true;
-//                 break;
-//             }
-//         }
-//     } else {
-//         // Worker processes send their solutions to root
-//         int buffer_size = 0;
-//         std::vector<uint8_t> buffer;
+                for (int r = 0; r < result->size; r++) {
+                    for (int c = 0; c < result->size; c++) {
+                        result->grid[r][c] = grid_data[r * result->size + c];
+                    }
+                }
+                break;  // We found a solution
+            }
+        }
+    } else {
+        // Send local solution to root
+        int has_solution = local_solution_found ? 1 : 0;
+        MPI_Send(&has_solution, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
         
-//         if (solution_found) {
-//             serialize_sudoku(result, buffer);
-//             buffer_size = buffer.size();
-//         }
+        if (local_solution_found) {
+            std::vector<uint8_t> grid_data(local_solution->size * local_solution->size);
+            for (int r = 0; r < local_solution->size; r++) {
+                for (int c = 0; c < local_solution->size; c++) {
+                    grid_data[r * local_solution->size + c] = local_solution->grid[r][c];
+                }
+            }
+            MPI_Send(grid_data.data(), grid_data.size(), MPI_UINT8_T, 0, 0, MPI_COMM_WORLD);
+        }
+    }
+
+    delete local_solution;
+}
+
+std::vector<Sudoku*> MPIBruteForceSolver::generate_initial_boards() {
+    std::vector<Sudoku*> boards;
+    std::queue<Sudoku*> q;
+    q.push(new Sudoku(*result));
+
+    int depth = 0;
+    while (depth < bootstrap && !q.empty()) {
+        int level_size = q.size();
+        for (int i = 0; i < level_size; i++) {
+            Sudoku* current = q.front();
+            q.pop();
+
+            int row = 0, col = 0;
+            bool found = false;
+            for (int r = 0; r < current->size; r++) {
+                for (int c = 0; c < current->size; c++) {
+                    if (current->grid[r][c] == 0) {
+                        row = r;
+                        col = c;
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) break;
+            }
+
+            if (!found) {
+                boards.push_back(current);
+                continue;
+            }
+
+            for (uint8_t num = 1; num <= current->size; num++) {
+                if (is_valid(row, col, num, current)) {
+                    Sudoku* next = new Sudoku(*current);
+                    next->grid[row][col] = num;
+                    if (depth == bootstrap - 1) {
+                        boards.push_back(next);
+                    } else {
+                        q.push(next);
+                    }
+                }
+            }
+            delete current;
+        }
+        depth++;
+    }
+
+    while (!q.empty()) {
+        delete q.front();
+        q.pop();
+    }
+
+    return boards;
+}
+
+void MPIBruteForceSolver::distribute_work(const std::vector<Sudoku*>& boards) {
+    int total_boards = boards.size();
+    int base_boards_per_proc = total_boards / world_size;
+    int extra_boards = total_boards % world_size;
+
+    int start_idx = 0;
+    for (int i = 0; i < world_size; i++) {
+        int boards_for_this_proc = base_boards_per_proc + (i < extra_boards ? 1 : 0);
         
-//         MPI_Send(&buffer_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
-//         if (buffer_size > 0) {
-//             MPI_Send(buffer.data(), buffer_size, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
-//         }
-//     }
-// }
+        if (i == 0) {
+            // Keep local boards for rank 0
+            for (int j = 0; j < boards_for_this_proc; j++) {
+                local_boards.push_back(new Sudoku(*boards[start_idx + j]));
+            }
+        } else {
+            // Send board count
+            MPI_Send(&boards_for_this_proc, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+            
+            // Send each board
+            for (int j = 0; j < boards_for_this_proc; j++) {
+                Sudoku* board = boards[start_idx + j];
+                // Send size and grid data
+                std::vector<uint8_t> grid_data(board->size * board->size);
+                for (int r = 0; r < board->size; r++) {
+                    for (int c = 0; c < board->size; c++) {
+                        grid_data[r * board->size + c] = board->grid[r][c];
+                    }
+                }
+                MPI_Send(&board->size, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+                MPI_Send(grid_data.data(), grid_data.size(), MPI_UINT8_T, i, 0, MPI_COMM_WORLD);
+            }
+        }
+        start_idx += boards_for_this_proc;
+    }
+}
 
-// void MPIBruteForceSolver::serialize_sudoku(const Sudoku* sudoku, std::vector<uint8_t>& buffer) {
-//     buffer.clear();
-//     buffer.push_back(sudoku->size);
+void MPIBruteForceSolver::receive_work() {
+    int board_count;
+    MPI_Recv(&board_count, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+    for (int i = 0; i < board_count; i++) {
+        int size;
+        MPI_Recv(&size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        
+        std::vector<uint8_t> grid_data(size * size);
+        MPI_Recv(grid_data.data(), grid_data.size(), MPI_UINT8_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        
+        Sudoku* board = new Sudoku();
+        board->size = size;
+        board->grid = new uint8_t*[size];
+        for (int r = 0; r < size; r++) {
+            board->grid[r] = new uint8_t[size];
+            for (int c = 0; c < size; c++) {
+                board->grid[r][c] = grid_data[r * size + c];
+            }
+        }
+        local_boards.push_back(board);
+    }
+}
+
+void MPIBruteForceSolver::copy_to_result(const Sudoku& source) {
+    for (int i = 0; i < result->size; i++) {
+        for (int j = 0; j < result->size; j++) {
+            result->grid[i][j] = source.grid[i][j];
+        }
+    }
+}
+
+bool MPIBruteForceSolver::is_valid(int row, int col, int num, const Sudoku* sudoku) const {
+    // Check row
+    for (int i = 0; i < sudoku->size; i++) {
+        if (sudoku->grid[row][i] == num) return false;
+    }
     
-//     for (int i = 0; i < sudoku->size; i++) {
-//         for (int j = 0; j < sudoku->size; j++) {
-//             buffer.push_back(sudoku->grid[i][j]);
-//         }
-//     }
-// }
-
-// Sudoku* MPIBruteForceSolver::deserialize_sudoku(const std::vector<uint8_t>& buffer) {
-//     Sudoku* sudoku = new Sudoku();
-//     sudoku->size = buffer[0];
+    // Check column
+    for (int i = 0; i < sudoku->size; i++) {
+        if (sudoku->grid[i][col] == num) return false;
+    }
     
-//     sudoku->grid = new uint8_t*[sudoku->size];
-//     for (int i = 0; i < sudoku->size; i++) {
-//         sudoku->grid[i] = new uint8_t[sudoku->size];
-//         for (int j = 0; j < sudoku->size; j++) {
-//             sudoku->grid[i][j] = buffer[1 + i * sudoku->size + j];
-//         }
-//     }
-//     return sudoku;
-// }
-
-// // The rest of the helper functions (is_valid, find_empty, etc.) remain the same as in the pthread version
+    // Check box
+    int box_size = sqrt(sudoku->size);
+    int box_row = (row / box_size) * box_size;
+    int box_col = (col / box_size) * box_size;
+    
+    for (int i = 0; i < box_size; i++) {
+        for (int j = 0; j < box_size; j++) {
+            if (sudoku->grid[box_row + i][box_col + j] == num) return false;
+        }
+    }
+    
+    return true;
+}
