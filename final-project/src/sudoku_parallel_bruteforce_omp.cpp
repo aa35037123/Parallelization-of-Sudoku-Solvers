@@ -1,80 +1,8 @@
 #include <iostream>
 #include <cmath>
-#include <queue>
 #include <omp.h>
 #include "sudoku_parallel_bruteforce.h"
-using namespace std;
 #define NUM_THREADS 4
-
-bool SerialBruteforceSolverForParallel::solve2() {
-    int row = 0;
-    int col = 0;
-
-    std::queue<vector<State>> q; // state: previous find row and column and number
-    Sudoku blank_sudoku;
-    blank_sudoku.copyFrom(*result);
-
-    vector<pair<int, int>> empty_cells;
-    for(int i = 0; i < result->size; i++){
-        for(int j = 0; j < result->size; j++){
-            if(result->grid[i][j] == 0){
-                empty_cells.push_back(make_pair(i, j));
-            }
-        }
-    }
-    //= new Sudoku(result->size, result->grid);
-    // q.push(std::make_pair(row, col));
-    // push first cell state
-    bool is_solved = !find_empty(row, col, blank_sudoku);
-    //std::cout << row << " " << col << "\n";
-    if (!is_solved) {
-        for (uint8_t num = 1; num <= result->size; num++) {
-            if (is_valid(row, col, num, blank_sudoku))
-                q.push({{num}});
-        }
-    }
-    while (!q.empty() && !is_solved) {
-        //std::cout << "In while...\n";
-        // std::pair<int, int> current = q.front();
-        vector<State> current = q.front();
-        q.pop();
-        for (auto i = 0; i < current.size(); i++)
-            blank_sudoku.grid[empty_cells[i].first][empty_cells[i].second] = current[i].num;
-        // std::cout <<"(row, col): " << row << ", " << col << "\n";
-        // result->print();
-        row = empty_cells[current.size() - 1].first;
-        col = empty_cells[current.size() - 1].second;
-        if (!find_empty(row, col, blank_sudoku)) {  // auto find the new empty row, col
-            is_solved = true;
-            break;
-        } 
-        // current.sudoku->print();
-        for(uint8_t num = 1; num <= result->size; num++){
-
-            if(is_valid(row, col, num, blank_sudoku)){
-                current.push_back({num});
-                q.push(current);
-                current.pop_back();
-            }
-        }
-        //blank_sudoku.print();
-        for (auto i = 0; i < current.size(); i++)
-            blank_sudoku.grid[empty_cells[i].first][empty_cells[i].second] = 0;
-    }
-    // if sudoku is solved, then free all sudoku elements in queue
-    // avoid doesn't free memory because of break
-    while (!q.empty())
-        q.pop();
-    
-    if (is_solved) {
-        for (int i = 0;i<result->size;i++){
-            for(int j = 0;j<result->size;j++){
-                result->grid[i][j] = blank_sudoku.grid[i][j];
-            }
-        }
-    }
-    return is_solved;
-}
 
 void OMPParallelBruteForceSolver::init(const Sudoku& sudoku) {
     if (result != nullptr) {
@@ -138,7 +66,7 @@ void OMPParallelBruteForceSolver::solve() {
     //std::cout << unsolvedBoards.size() << std::endl;
 
     #pragma omp parallel for shared(idx)
-    for (int num = 0; num < unsolvedBoards.size(); ++num) {
+    for (size_t num = 0; num < unsolvedBoards.size(); ++num) {
         bool found = unsolvedBoards[num]->solve2();
         if (found) {
             #pragma omp critical
@@ -152,7 +80,7 @@ void OMPParallelBruteForceSolver::solve() {
         copy_result(*(unsolvedBoards[idx]->result));
     }
     else {
-        cout << "No solution found" << endl;
+        std::cout << "No solution found" << std::endl;
     }
 }
 

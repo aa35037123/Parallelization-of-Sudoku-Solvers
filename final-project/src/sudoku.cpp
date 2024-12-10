@@ -7,6 +7,7 @@
 #include <vector>
 #include <algorithm>
 #include <ctime>
+#include <random>
 
 void Sudoku::allocateGrid() {
     grid = new uint8_t*[size];
@@ -166,7 +167,11 @@ void Sudoku::random_empty_cells(int empty_cells) {
         }
     }
     std::srand(std::time(nullptr));
-    std::random_shuffle(empty_indices.begin(), empty_indices.end());
+    
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(empty_indices.begin(), empty_indices.end(), g);
+    
     for (int i = 0; i < empty_cells; ++i) {
         int row = empty_indices[i] / size;
         int col = empty_indices[i] % size;

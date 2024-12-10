@@ -1,8 +1,9 @@
-#include "sudoku_parallel_bruteforce.h"
+#include "sudoku_parallel_backtracking.h"
 #include <cmath>
 #include <queue>
+#include <iostream>
 
-void PthreadParallelBruteForceSolver::init(const Sudoku& sudoku) {
+void PthreadParallelBacktrackingSolver::init(const Sudoku& sudoku) {
     if (result != nullptr) {
         delete result;
         result = nullptr;
@@ -13,14 +14,19 @@ void PthreadParallelBruteForceSolver::init(const Sudoku& sudoku) {
 
     std::vector<Sudoku*> initial_choices = init_unsolved_boards(0, result);
     for (Sudoku* choice : initial_choices) {
-        SerialBruteforceSolverForParallel* sbf = new SerialBruteforceSolverForParallel(*choice);
+        SerialBacktrackingSolverForParallel* sbf = new SerialBacktrackingSolverForParallel(*choice);
+        sbf->solved = new bool(false);
+        sbf->this_solver = false;
         unsolvedBoards.push_back(sbf);
         delete choice;
     }
 }
 
-void* PthreadParallelBruteForceSolver::solve_thread(void* arg) {
-    ThreadData* data = static_cast<ThreadData*>(arg);
+void* PthreadParallelBacktrackingSolver::solve_thread(void* arg) {
+    BacktrackingThreadData* data = static_cast<BacktrackingThreadData*>(arg);
+    if (*(data->solver->solved)) {
+        return nullptr;
+    }
     bool found = data->solver->solve2();
     
     if (found) {
@@ -33,9 +39,9 @@ void* PthreadParallelBruteForceSolver::solve_thread(void* arg) {
     return nullptr;
 }
 
-void PthreadParallelBruteForceSolver::solve() {
+void PthreadParallelBacktrackingSolver::solve() {
     std::vector<pthread_t> threads(unsolvedBoards.size());
-    std::vector<ThreadData> thread_data(unsolvedBoards.size());
+    std::vector<BacktrackingThreadData> thread_data(unsolvedBoards.size());
     std::atomic<int> solution_found{-1};
 
     // Create threads
@@ -65,7 +71,7 @@ void PthreadParallelBruteForceSolver::solve() {
     }
 }
 
-std::vector<Sudoku*> PthreadParallelBruteForceSolver::init_unsolved_boards(int current_strap, const Sudoku* local_result) {
+std::vector<Sudoku*> PthreadParallelBacktrackingSolver::init_unsolved_boards(int current_strap, const Sudoku* local_result) {
     std::vector<Sudoku*> initial_choices;
     if (current_strap == bootstrap) {
         initial_choices.push_back(new Sudoku(*local_result));
@@ -102,7 +108,7 @@ std::vector<Sudoku*> PthreadParallelBruteForceSolver::init_unsolved_boards(int c
     return initial_choices;
 }
 
-bool PthreadParallelBruteForceSolver::is_valid(int row, int col, int num, const Sudoku* sudoku) const {
+bool PthreadParallelBacktrackingSolver::is_valid(int row, int col, int num, const Sudoku* sudoku) const {
     // Check row and column for conflicts
     for (int i = 0; i < sudoku->size; ++i) {
         if (sudoku->grid[row][i] == num || sudoku->grid[i][col] == num) {
@@ -125,7 +131,7 @@ bool PthreadParallelBruteForceSolver::is_valid(int row, int col, int num, const 
     return true;
 }
 
-void PthreadParallelBruteForceSolver::copy_result(const Sudoku& sudoku) {
+void PthreadParallelBacktrackingSolver::copy_result(const Sudoku& sudoku) {
     for (int i = 0; i < sudoku.size; ++i) {
         for (int j = 0; j < sudoku.size; ++j) {
             result->grid[i][j] = sudoku.grid[i][j];
@@ -133,7 +139,7 @@ void PthreadParallelBruteForceSolver::copy_result(const Sudoku& sudoku) {
     }
 }
 
-bool PthreadParallelBruteForceSolver::find_empty(int &row, int &col, const Sudoku* local_result) const {
+bool PthreadParallelBacktrackingSolver::find_empty(int &row, int &col, const Sudoku* local_result) const {
     // First check the remaining cells in the current row
     for (int c = col; c < local_result->size; ++c) {
         if (local_result->grid[row][c] == 0) {

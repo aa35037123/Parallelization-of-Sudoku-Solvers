@@ -40,7 +40,7 @@ void SerialBruteForceSolver::solve() {
         // std::pair<int, int> current = q.front();
         vector<State> current = q.front();
         q.pop();
-        for (int i = 0; i < current.size(); i++)
+        for (size_t i = 0; i < current.size(); i++)
             blank_sudoku->grid[empty_cells[i].first][empty_cells[i].second] = current[i].num;
         // std::cout <<"(row, col): " << row << ", " << col << "\n";
         // result->print();
@@ -60,7 +60,7 @@ void SerialBruteForceSolver::solve() {
             }
         }
         //blank_sudoku->print();
-        for (auto i = 0; i < empty_cells.size(); i++)
+        for (size_t i = 0; i < empty_cells.size(); i++)
             blank_sudoku->grid[empty_cells[i].first][empty_cells[i].second] = 0;
     }
     // if sudoku is solved, then free all sudoku elements in queue

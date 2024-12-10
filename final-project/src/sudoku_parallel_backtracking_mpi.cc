@@ -1,25 +1,28 @@
-#include "sudoku_parallel_bruteforce.h"
-#include "sudoku_parallel_bruteforce_mpi.h"
+// sudoku_parallel_bruteforce_mpi.cc
+
+#include "sudoku_parallel_backtracking.h"
+#include "sudoku_parallel_backtracking_mpi.h"
 #include <mpi.h>
 #include <cmath>
+#include <queue>
 
-MPIBruteForceSolver::MPIBruteForceSolver() {
+MPIBacktrackingSolver::MPIBacktrackingSolver() {
     result = nullptr;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 }
 
-MPIBruteForceSolver::MPIBruteForceSolver(const Sudoku& sudoku) : MPIBruteForceSolver() {
+MPIBacktrackingSolver::MPIBacktrackingSolver(const Sudoku& sudoku) : MPIBacktrackingSolver() {
     init(sudoku);
 }
 
-MPIBruteForceSolver::~MPIBruteForceSolver() {
+MPIBacktrackingSolver::~MPIBacktrackingSolver() {
     for (Sudoku* board : local_boards) {
         delete board;
     }
 }
 
-void MPIBruteForceSolver::init(const Sudoku& sudoku) {
+void MPIBacktrackingSolver::init(const Sudoku& sudoku) {
     if (result != nullptr) {
         delete result;
     }
@@ -39,14 +42,15 @@ void MPIBruteForceSolver::init(const Sudoku& sudoku) {
     }
 }
 
-void MPIBruteForceSolver::solve() {
+void MPIBacktrackingSolver::solve() {
     bool local_solution_found = false;
     Sudoku* local_solution = nullptr;
 
-    
     // Try to solve each local board
     for (Sudoku* board : local_boards) {
-        SerialBruteforceSolverForParallel* solver = new SerialBruteforceSolverForParallel(*board);
+        SerialBacktrackingSolverForParallel* solver = new SerialBacktrackingSolverForParallel(*board);
+        solver->solved = &local_solution_found;
+        solver->this_solver = false;
         if (solver->solve2()) {
             local_solution_found = true;
             local_solution = new Sudoku(*(solver->result));
@@ -95,7 +99,7 @@ void MPIBruteForceSolver::solve() {
     delete local_solution;
 }
 
-std::vector<Sudoku*> MPIBruteForceSolver::generate_initial_boards() {
+std::vector<Sudoku*> MPIBacktrackingSolver::generate_initial_boards() {
     std::vector<Sudoku*> boards;
     std::queue<Sudoku*> q;
     q.push(new Sudoku(*result));
@@ -150,7 +154,7 @@ std::vector<Sudoku*> MPIBruteForceSolver::generate_initial_boards() {
     return boards;
 }
 
-void MPIBruteForceSolver::distribute_work(const std::vector<Sudoku*>& boards) {
+void MPIBacktrackingSolver::distribute_work(const std::vector<Sudoku*>& boards) {
     int total_boards = boards.size();
     int base_boards_per_proc = total_boards / world_size;
     int extra_boards = total_boards % world_size;
@@ -186,7 +190,7 @@ void MPIBruteForceSolver::distribute_work(const std::vector<Sudoku*>& boards) {
     }
 }
 
-void MPIBruteForceSolver::receive_work() {
+void MPIBacktrackingSolver::receive_work() {
     int board_count;
     MPI_Recv(&board_count, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
@@ -210,7 +214,7 @@ void MPIBruteForceSolver::receive_work() {
     }
 }
 
-void MPIBruteForceSolver::copy_to_result(const Sudoku& source) {
+void MPIBacktrackingSolver::copy_to_result(const Sudoku& source) {
     for (int i = 0; i < result->size; i++) {
         for (int j = 0; j < result->size; j++) {
             result->grid[i][j] = source.grid[i][j];
@@ -218,7 +222,7 @@ void MPIBruteForceSolver::copy_to_result(const Sudoku& source) {
     }
 }
 
-bool MPIBruteForceSolver::is_valid(int row, int col, int num, const Sudoku* sudoku) const {
+bool MPIBacktrackingSolver::is_valid(int row, int col, int num, const Sudoku* sudoku) const {
     // Check row
     for (int i = 0; i < sudoku->size; i++) {
         if (sudoku->grid[row][i] == num) return false;
