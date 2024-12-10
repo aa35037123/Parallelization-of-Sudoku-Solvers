@@ -60,7 +60,6 @@ void MPIBruteForceSolver::solve() {
         if (local_solution_found) {
             copy_to_result(*local_solution);
         }
-        std::cout << "World size: " << world_size << std::endl;
         // Check solutions from other processes
         for (int i = 1; i < world_size; i++) {
             int has_solution;
