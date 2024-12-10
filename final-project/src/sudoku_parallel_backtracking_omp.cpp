@@ -20,10 +20,12 @@ void OMPParallelBacktrackingSolver::init(const Sudoku& sudoku) {
         }
     }
 
-    
+    bool *done = new bool(false);
     std::vector<Sudoku*> initial_choices = generate_initial_choices(0, result);
     for (Sudoku* choice : initial_choices) {
         SerialBacktrackingSolverForParallel* solver = new SerialBacktrackingSolverForParallel(*choice);
+        solver->solved = done;
+        solver->this_solver = false;
         solvers.push_back(solver);
     }
 }
@@ -81,9 +83,11 @@ void OMPParallelBacktrackingSolver::solve() {
         }
     }
 
-    if (idx != -1) {
-        copy_result(solvers[idx]->result);
-        // std::cout << "Solved by solver " << idx << std::endl;
+    for (size_t i = 0; i < solvers.size(); ++i) {
+        if (solvers[i]->this_solver) {
+            copy_result(solvers[i]->result);
+            break;
+        }
     }
 }
 
