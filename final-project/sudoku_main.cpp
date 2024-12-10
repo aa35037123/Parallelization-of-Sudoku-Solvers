@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    std::vector<string> files;
+    std::vector<std::string> files;
     if (filename == "medium") {
         for (int i = 1; i <= 100; i++){
             files.push_back("mazes/16x16_medium_" + std::to_string(i) + ".txt");
@@ -134,10 +134,10 @@ int main(int argc, char* argv[]) {
     // Print results
     std::cout << "Using algorithm: " << algorithmName << "\n";
     std::cout << "Sudoku puzzle loaded from: " << filename << "\n";
-    solver->result->print();
+    // solver->result->print();
 
-    bool valid = solver->result->isValid();
-    std::cout << "Sudoku is " << (valid ? "valid." : "invalid.") << std::endl;
+    // bool valid = solver->result->isValid();
+    // std::cout << "Sudoku is " << (valid ? "valid." : "invalid.") << std::endl;
 
     return 0;
 }
