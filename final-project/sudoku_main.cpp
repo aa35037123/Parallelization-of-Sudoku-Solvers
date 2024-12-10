@@ -11,6 +11,7 @@
 #include <cstring>
 #include <vector>
 #include "CycleTimer.h"
+#define CASES 10
 
 void printUsage(const char* programName) {
     std::cerr << "Usage: " << programName << " <path_to_sudoku_file> [--algorithm <number>]\n"
@@ -58,7 +59,7 @@ int main(int argc, char* argv[]) {
 
     std::vector<std::string> files;
     if (filename == "medium") {
-        for (int i = 1; i <= 100; i++){
+        for (int i = 1; i <= CASES; i++){
             files.push_back("mazes/16x16_Medium_" + std::to_string(i) + ".txt");
         }
     }
