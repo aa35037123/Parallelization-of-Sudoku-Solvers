@@ -43,6 +43,7 @@ void MPIBruteForceSolver::solve() {
     bool local_solution_found = false;
     Sudoku* local_solution = nullptr;
 
+    
     // Try to solve each local board
     for (Sudoku* board : local_boards) {
         SerialBruteforceSolverForParallel* solver = new SerialBruteforceSolverForParallel(*board);
