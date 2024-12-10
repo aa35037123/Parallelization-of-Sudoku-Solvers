@@ -9,7 +9,9 @@
 #include <memory>
 #include <string>
 #include <cstring>
+#include <vector>
 #include "CycleTimer.h"
+#define CASES 10
 
 void printUsage(const char* programName) {
     std::cerr << "Usage: " << programName << " <path_to_sudoku_file> [--algorithm <number>]\n"
@@ -43,10 +45,26 @@ int main(int argc, char* argv[]) {
                 printUsage(argv[0]);
                 return 1;
             }
-        } else {
-            // Assume this is the filename
-            filename = argv[i];
+        } 
+        else if (strcmp(argv[i], "--file") == 0) {
+            if (i + 1 < argc) {
+                filename = argv[++i];
+            } else {
+                std::cerr << "Error: --file requires a value\n";
+                printUsage(argv[0]);
+                return 1;
+            }
         }
+    }
+
+    std::vector<std::string> files;
+    if (filename == "medium") {
+        for (int i = 1; i <= CASES; i++){
+            files.push_back("mazes/16x16_Medium_" + std::to_string(i) + ".txt");
+        }
+    }
+    else{
+        files.push_back(filename);
     }
 
     if (filename.empty()) {
@@ -55,13 +73,17 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Load the Sudoku puzzle
-    Sudoku sudoku;
-    sudoku.loadSudoku(filename);
-    std::unique_ptr<SudokuSolver> solver;
     std::string algorithmName;
 
     double startTime = CycleTimer::currentSeconds();
+    std::vector<double> times;
+    for (auto file : files){
+        // Load the Sudoku puzzle
+        double start = CycleTimer::currentSeconds();
+        Sudoku sudoku;
+        sudoku.loadSudoku(file);
+        std::unique_ptr<SudokuSolver> solver;
+        
 
     // Create the appropriate solver based on the algorithm choice
     switch (algorithmChoice) {
@@ -99,18 +121,29 @@ int main(int argc, char* argv[]) {
             return 1;
     }
 
-    solver->solve();
+        solver->solve();
 
+        double end = CycleTimer::currentSeconds();
+        times.push_back((end - start) * 1000);
+        if (!solver->result->isValid()) {
+            std::cerr << "Error: Invalid solution on " << file <<"\n";
+            return 1;
+        }
+        
+    }
     double endTime = CycleTimer::currentSeconds();
-    std::cout << "Time: " << (endTime - startTime) * 1000 << " ms\n";
+    for (int i = 0; i < times.size(); i++){
+        std::cout << "Time for " << files[i] << ": " << times[i] << " ms\n";
+    }
+    std::cout << "Total Time: " << (endTime - startTime) * 1000 << " ms\n";
     
     // Print results
     std::cout << "Using algorithm: " << algorithmName << "\n";
     std::cout << "Sudoku puzzle loaded from: " << filename << "\n";
-    solver->result->print();
+    // solver->result->print();
 
-    bool valid = solver->result->isValid();
-    std::cout << "Sudoku is " << (valid ? "valid." : "invalid.") << std::endl;
+    // bool valid = solver->result->isValid();
+    // std::cout << "Sudoku is " << (valid ? "valid." : "invalid.") << std::endl;
 
     return 0;
 }
