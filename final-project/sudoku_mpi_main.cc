@@ -1,9 +1,9 @@
 #include "sudoku.h"
 #include "sudoku_serial_backtracking.h"
 #include "sudoku_serial_bruteforce.h"
-#include "sudoku_serial_genetic.h"
 #include "sudoku_parallel_bruteforce.h"
 #include "sudoku_parallel_bruteforce_mpi.h"
+#include "sudoku_parallel_backtracking_mpi.h"
 #include <iostream>
 #include <memory>
 #include <string>
@@ -16,7 +16,9 @@ void printUsage(const char* programName) {
               << "Available algorithms:\n"
               << "  1  - Serial implementation using backtracking\n"
               << "  2  - Serial implementation using brute force\n"
-              << "  3  - Parallel MPI implementation using brute force \n";
+              << "  3  - Parallel MPI implementation using backtracking\n"
+              << "  4  - Parallel MPI implementation using brute force\n";
+        
 }
 
 int main(int argc, char* argv[]) {
@@ -99,6 +101,10 @@ int main(int argc, char* argv[]) {
             algorithmName = "Serial bruteforce (BFS)";
             break;
         case 3:
+            solver = std::make_unique<MPIBacktrackingSolver>(sudoku);
+            algorithmName = "Parallel MPI backtracking (DFS)";
+            break;
+        case 4:
             solver = std::make_unique<MPIBruteForceSolver>(sudoku);
             algorithmName = "Parallel MPI bruteforce (BFS)";
             break;
