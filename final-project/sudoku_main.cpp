@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
     std::string algorithmName;
 
     double startTime = CycleTimer::currentSeconds();
-    vector<double> times;
+    std::vector<double> times;
     for (auto file : files){
         // Load the Sudoku puzzle
         double start = CycleTimer::currentSeconds();
