@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
     std::vector<string> files;
     if (filename == "medium") {
         for (int i = 1; i <= 100; i++){
-            files.push_back("mazes/16x16_medium_" + std::atoi(i) + ".txt");
+            files.push_back("mazes/16x16_medium_" + std::to_string(i) + ".txt");
         }
     }
     else{
