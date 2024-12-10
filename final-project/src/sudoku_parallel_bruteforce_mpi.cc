@@ -14,7 +14,7 @@ MPIBruteForceSolver::MPIBruteForceSolver(const Sudoku& sudoku) : MPIBruteForceSo
 }
 
 MPIBruteForceSolver::~MPIBruteForceSolver() {
-    for (auto board : local_boards) {
+    for (Sudoku* board : local_boards) {
         delete board;
     }
 }
@@ -30,7 +30,7 @@ void MPIBruteForceSolver::init(const Sudoku& sudoku) {
         std::vector<Sudoku*> initial_boards = generate_initial_boards();
         distribute_work(initial_boards);
 
-        for (auto board : initial_boards) {
+        for (Sudoku* board : initial_boards) {
             delete board;
         }
     } else {
@@ -44,7 +44,7 @@ void MPIBruteForceSolver::solve() {
     Sudoku* local_solution = nullptr;
 
     // Try to solve each local board
-    for (auto board : local_boards) {
+    for (Sudoku* board : local_boards) {
         SerialBruteforceSolverForParallel* solver = new SerialBruteforceSolverForParallel(*board);
         if (solver->solve2()) {
             local_solution_found = true;

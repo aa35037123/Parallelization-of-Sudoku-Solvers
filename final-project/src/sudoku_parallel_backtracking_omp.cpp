@@ -6,7 +6,7 @@
 #define NUM_THREADS 4
 
 
-void ParallelBacktrackingSolver::init(const Sudoku& sudoku) {
+void OMPParallelBacktrackingSolver::init(const Sudoku& sudoku) {
     omp_set_dynamic(0);
     omp_set_num_threads(NUM_THREADS);
             
@@ -21,17 +21,20 @@ void ParallelBacktrackingSolver::init(const Sudoku& sudoku) {
     }
 
     
-    std::vector<Sudoku*> initial_choices = generate_initial_choices(result);
-    bool *done = new bool(false);
+    std::vector<Sudoku*> initial_choices = generate_initial_choices(0, result);
     for (Sudoku* choice : initial_choices) {
         SerialBacktrackingSolverForParallel* solver = new SerialBacktrackingSolverForParallel(*choice);
-        solver->solved = done;
         solvers.push_back(solver);
     }
 }
 
-std::vector<Sudoku*> ParallelBacktrackingSolver::generate_initial_choices(const Sudoku* local_result) {
+std::vector<Sudoku*> OMPParallelBacktrackingSolver::generate_initial_choices(int current_strap, const Sudoku* local_result) {
     std::vector<Sudoku*> initial_choices;
+    if (current_strap == bootstrap) {
+        initial_choices.push_back(new Sudoku(*local_result));
+        return initial_choices;
+    }
+
     int row, col;
     if (!find_empty(row, col, local_result)) {
         return initial_choices;
@@ -44,18 +47,23 @@ std::vector<Sudoku*> ParallelBacktrackingSolver::generate_initial_choices(const 
             choice->grid = new uint8_t*[local_result->size];
             for (int i = 0; i < local_result->size; ++i) {
                 choice->grid[i] = new uint8_t[local_result->size];
-                for (int j = 0; j < local_result->size; ++j) {
-                    choice->grid[i][j] = local_result->grid[i][j];
-                }
+                std::copy(local_result->grid[i], 
+                         local_result->grid[i] + local_result->size,
+                         choice->grid[i]);
             }
             choice->grid[row][col] = num;
-            initial_choices.push_back(choice);
+            std::vector<Sudoku*> next_choices = generate_initial_choices(current_strap + 1, choice);
+            if (next_choices.empty())
+                continue;
+            for (Sudoku* next_choice : next_choices) {
+                initial_choices.push_back(next_choice);
+            }
         }
     }
     return initial_choices;
 }
 
-void ParallelBacktrackingSolver::solve() {
+void OMPParallelBacktrackingSolver::solve() {
     
     // Find the first empty cell
     // if (!find_empty(row, col)) {
@@ -79,7 +87,7 @@ void ParallelBacktrackingSolver::solve() {
     }
 }
 
-bool ParallelBacktrackingSolver::backtracking(Sudoku* local_result) {
+bool OMPParallelBacktrackingSolver::backtracking(Sudoku* local_result) {
     int row, col;
 
     // Find the next empty cell
@@ -102,7 +110,7 @@ bool ParallelBacktrackingSolver::backtracking(Sudoku* local_result) {
     return false;
 }
 
-bool ParallelBacktrackingSolver::is_valid(int row, int col, int num, const Sudoku* local_result) const {
+bool OMPParallelBacktrackingSolver::is_valid(int row, int col, int num, const Sudoku* local_result) const {
     // Check row and column for conflicts
     for (int i = 0; i < local_result->size; ++i) {
         if (local_result->grid[row][i] == num || local_result->grid[i][col] == num) {
@@ -123,7 +131,7 @@ bool ParallelBacktrackingSolver::is_valid(int row, int col, int num, const Sudok
     return true;
 }
 
-bool ParallelBacktrackingSolver::find_empty(int &row, int &col, const Sudoku* local_result) const {
+bool OMPParallelBacktrackingSolver::find_empty(int &row, int &col, const Sudoku* local_result) const {
     for (row = 0; row < local_result->size; ++row) {
         for (col = 0; col < local_result->size; ++col) {
             if (local_result->grid[row][col] == 0) {
@@ -134,7 +142,7 @@ bool ParallelBacktrackingSolver::find_empty(int &row, int &col, const Sudoku* lo
     return false;
 }
 
-void ParallelBacktrackingSolver::copy_result(const Sudoku* local_result) {
+void OMPParallelBacktrackingSolver::copy_result(const Sudoku* local_result) {
     for (int i = 0; i < local_result->size; ++i) {
         for (int j = 0; j < local_result->size; ++j) {
             result->grid[i][j] = local_result->grid[i][j];
@@ -142,21 +150,10 @@ void ParallelBacktrackingSolver::copy_result(const Sudoku* local_result) {
     }
 }
 
-void ParallelBacktrackingSolver::cleanup(Sudoku* local_result) {
+void OMPParallelBacktrackingSolver::cleanup(Sudoku* local_result) {
     for (int i = 0; i < local_result->size; ++i) {
         delete[] local_result->grid[i];
     }
     delete[] local_result->grid;
     delete local_result;
-}
-
-void ParallelBacktrackingSolver::display() const {
-
-    #pragma omp parallel for
-    for (int i = 0; i < result->size; ++i) {
-        for (int j = 0; j < result->size; ++j) {
-            std::cout << static_cast<int>(result->grid[i][j]) << " ";
-        }
-        std::cout << std::endl;
-    }
 }

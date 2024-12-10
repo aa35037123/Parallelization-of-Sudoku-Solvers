@@ -15,8 +15,8 @@ COMMON_DEPENDENCIES = \
 	./src/sudoku.cpp \
 	./src/sudoku_serial_bruteforce.cpp \
 	./src/sudoku_serial_backtracking.cpp \
-	./src/sudoku_parallel_backtracking.cpp \
-	./src/sudoku_parallel_backtracking_multiblocks.cpp \
+	./src/sudoku_parallel_backtracking_omp.cpp \
+ 	./src/sudoku_parallel_backtracking_pthread.cpp \
 	./src/sudoku_parallel_bruteforce_omp.cpp \
 	./src/sudoku_parallel_bruteforce_pthread.cpp \
 	./src/serial_bruteforce_solver_for_parallel.cpp \
