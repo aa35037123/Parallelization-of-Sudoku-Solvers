@@ -20,6 +20,7 @@ DEPENDENCIES = \
 	./src/sudoku_parallel_backtracking.cpp \
 	./src/sudoku_parallel_backtracking_multiblocks.cpp \
 	./src/sudoku_serial_genetic.cpp \
+	./src/sudoku_parallel_dfs_grid.cpp \
 	
 all: $(TARGETS)
 

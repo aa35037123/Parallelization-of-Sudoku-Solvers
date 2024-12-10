@@ -1,0 +1,1 @@
+srun --mpi=pmix -N 8 ./sudoku_mpi mazes/1.txt --algorithm 6
