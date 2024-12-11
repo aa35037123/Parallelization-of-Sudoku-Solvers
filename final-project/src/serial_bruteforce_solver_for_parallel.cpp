@@ -5,7 +5,7 @@ bool SerialBruteforceSolverForParallel::solve2() {
     int row = 0;
     int col = 0;
 
-    std::queue<std::vector<State>> q; // state: previous find row and column and number
+    std::queue<std::vector<int>> q; // state: previous find row and column and number
     Sudoku blank_sudoku;
     blank_sudoku.copyFrom(*result);
 
@@ -25,16 +25,18 @@ bool SerialBruteforceSolverForParallel::solve2() {
     if (!is_solved) {
         for (uint8_t num = 1; num <= result->size; num++) {
             if (is_valid(row, col, num, blank_sudoku))
-                q.push({{num}});
+                q.push({num});
         }
     }
     while (!q.empty() && !is_solved) {
         //std::cout << "In while...\n";
         // std::pair<int, int> current = q.front();
-        std::vector<State> current = q.front();
+        std::vector<int> current = q.front();
         q.pop();
+        // std::cout << "Current size: " << current.size() << '\n';
+
         for (size_t i = 0; i < current.size(); i++)
-            blank_sudoku.grid[empty_cells[i].first][empty_cells[i].second] = current[i].num;
+            blank_sudoku.grid[empty_cells[i].first][empty_cells[i].second] = current[i];
         // std::cout <<"(row, col): " << row << ", " << col << "\n";
         // result->print();
         row = empty_cells[current.size() - 1].first;
@@ -47,7 +49,7 @@ bool SerialBruteforceSolverForParallel::solve2() {
         for(uint8_t num = 1; num <= result->size; num++){
 
             if(is_valid(row, col, num, blank_sudoku)){
-                current.push_back({num});
+                current.push_back(num);
                 q.push(current);
                 current.pop_back();
             }

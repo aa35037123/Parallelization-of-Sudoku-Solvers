@@ -25,7 +25,7 @@ void printUsage(const char* programName) {
               << "  5  - Parallel Pthread implementation using backtracking algorithm\n"
               << "  6  - Parallel OMP implementation using brute force algorithm\n"
               << "  7  - Parallel Pthread implementation using brute force algorithm\n"
-              << "  8  - Parallel Pthread implementation using backtracking algorithm\n";
+              << "  8  - Parallel Pthread implementation using backtracking algorithm (Not worked)\n";
 }
 
 int main(int argc, char* argv[]) {

@@ -40,6 +40,7 @@ void SerialBruteForceSolver::solve() {
         // std::pair<int, int> current = q.front();
         vector<State> current = q.front();
         q.pop();
+        // std::cout << "Current size: " << current.size() << '\n';
         for (size_t i = 0; i < current.size(); i++)
             blank_sudoku->grid[empty_cells[i].first][empty_cells[i].second] = current[i].num;
         // std::cout <<"(row, col): " << row << ", " << col << "\n";
