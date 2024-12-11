@@ -1,3 +1,9 @@
+echo "---------Backtracking Serial----------";
+srun ./sudoku_main --file medium --algorithm 1;
+
+echo "---------BruteForce Serial----------";
+srun ./sudoku_main --file medium --algorithm 2;
+
 echo "---------Backtracking Openmp----------";
 srun -c 1 ./sudoku_main --file medium --algorithm 4;
 srun -c 2 ./sudoku_main --file medium --algorithm 4;
